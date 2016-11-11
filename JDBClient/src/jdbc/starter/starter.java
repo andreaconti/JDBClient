@@ -2,6 +2,7 @@ package jdbc.starter;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import jdbc.view.ClientInput;
 
 public class starter extends Application {
 
@@ -11,8 +12,6 @@ public class starter extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		
-		// TODO
 		
 	}
 
