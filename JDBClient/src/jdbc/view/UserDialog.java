@@ -18,7 +18,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 
-class UserDialog {
+public class UserDialog {
 	
 	private String cssPath;
 	

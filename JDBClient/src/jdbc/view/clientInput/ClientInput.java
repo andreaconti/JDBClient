@@ -1,9 +1,9 @@
-package jdbc.view;
+package jdbc.view.clientInput;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-import javafx.beans.Observable;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -16,71 +16,75 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import jdbc.view.QueryError;
+import jdbc.view.UserDialog;
 
 public class ClientInput extends Stage {
 	
+	// root node
 	private VBox rootNode;
+	
+	// toolbar nella parte alta
+	private ObservableList<String> databases;
 	private ComboBox<String> databasePath;
 	private TextField username;
 	private PasswordField password;
 	private Button connection;
-	private boolean isConnected = false;
 	
+	// corpo centrale view
 	private TextArea query;
-	private Button sendQuery;
-	private TextArea sqlError;
+	private ObservableList<QueryError> errors;
+	private TableView<QueryError> errorsTable;
 	
-	private Optional<String> databaseRequested = Optional.empty();
+	// toolbar in basso
+	private Button sendQuery;
+	
+	// elementi utili e di utilizzo 
+	private Optional<String> databaseToAddOrDelete = Optional.empty();
 	private Optional<Path> exportingPath = Optional.empty();
 	private StringProperty obsQueryText = new SimpleStringProperty();
+	private boolean isConnected = false;
 	
+	// styling
 	private String cssPath;
 
+	/* COSTRUTTORI */
 	public ClientInput(String username, ObservableList<String> databases, double width, double height) {
 		
+		validate("username or databases list is null", username, databases );
+		if ( width < 0 || height < 0 )
+			throw new IllegalArgumentException("width < 0  || height < 0");
+		
+		// imposto root..
 		rootNode = new VBox(10);
 		rootNode.setPadding(new Insets(10,10,10,10));
 		Scene scene = new Scene(rootNode, width, height);
 		this.setScene(scene);
 		
-		// create controlBar
-		HBox bar = new HBox(10);
+		// creo toolbar alta
+		HBox HighToolbar = new HBox(10);
 		{
-			databasePath = new ComboBox<String>(databases);
-			if (!databases.isEmpty()) { databasePath.getSelectionModel().select(0); }
-			databasePath.setMinWidth(100);
-			HBox.setHgrow(databasePath, Priority.ALWAYS);
-			this.username = new TextField(username);
-			this.username.setPromptText("username");
-			HBox.setHgrow(this.username, Priority.ALWAYS);
-			password = new PasswordField();
-			password.setPromptText("password");
-			HBox.setHgrow(this.password, Priority.ALWAYS);
-			connection = new Button("connect");
-			connection.setMinWidth(100);
-			bar.getChildren().addAll(databasePath, this.username, password, connection);
+			initDatabasePaths(databases);
+			this.initPasswordAndUsername(username);
+			initConnectionButton();
+			HighToolbar.getChildren().addAll(databasePath, this.username, password, connection);
 		}
 		
-		query = new TextArea();
-		query.setWrapText(true);
-		obsQueryText = query.textProperty();
-		VBox.setVgrow(query, Priority.ALWAYS);
-		sqlError = new TextArea();
-		sqlError.setWrapText(true);
+		initQueryArea();
+		initErrorsTable();
+		initSendQuery();
 		
-		sendQuery = new Button("Send Query");
-		sendQuery.setMaxWidth(Double.MAX_VALUE);
-		
-		rootNode.getChildren().addAll(setMainMenu(),bar, query, sqlError, sendQuery);
-		
-		this.setFiringEvents();
+		rootNode.getChildren().addAll(setMainMenu(),HighToolbar, query, errorsTable, sendQuery);
 	}
 	
 	public ClientInput(ObservableList<String> databases, double width, double height) {
@@ -126,7 +130,7 @@ public class ClientInput extends Stage {
 					if (cssPath != null) dialog = new UserDialog(cssPath); else dialog = new UserDialog();
 					Optional<String> string = dialog.askForString("Archive Database", "Write here the complete path of the database..");
 					if (string.isPresent()) {
-						this.databaseRequested = string;
+						this.databaseToAddOrDelete = string;
 						this.fireEvent(new ClientInputEvent(this, ClientInputEvent.ADD_DATABASE_REQUEST));
 					}
 				});
@@ -135,7 +139,7 @@ public class ClientInput extends Stage {
 					String toDelete = list.getListView().getSelectionModel().getSelectedItem();
 					if ( toDelete != null ) {
 						System.out.println(toDelete);
-						this.databaseRequested = Optional.of(toDelete);
+						this.databaseToAddOrDelete = Optional.of(toDelete);
 						this.fireEvent(new ClientInputEvent(this, ClientInputEvent.REMOVE_DATABASE_REQUEST));
 					}
 				});
@@ -167,30 +171,15 @@ public class ClientInput extends Stage {
 		
 	}
 	
-	
-	// firing events
-	
-	private void setFiringEvents() {
-		
-		sendQuery.setOnAction( ev -> this.fireEvent(new ClientInputEvent(this, ClientInputEvent.SUBMIT_QUERY_REQUEST)));
-		
-		connection.setOnAction( ev -> {
-			if (isConnected == false) {
-				this.fireEvent(new ClientInputEvent(this, ClientInputEvent.CONNECTION_REQUEST));
-			}
-			else
-				this.fireEvent(new ClientInputEvent(this, ClientInputEvent.DISCONNECTION_REQUEST));
-		});
-		
-	}
-	
-	// getters && setters
+	/* GETTERS && SETTERS */
 
+	// username and password
 	public String getUsername() {
 		return username.getText();
 	}
 	
 	public void setUsername(String username) {
+		validate("username is null", username);
 		this.username.setText(username);
 	}
 	
@@ -206,38 +195,50 @@ public class ClientInput extends Stage {
 		this.password.setText("");
 	}
 	
-	public String getdatabaseURL() {
+	// databases paths
+	public String getdatabaseURLSelected() {
 		return databasePath.getSelectionModel().getSelectedItem();
 	}
+	
+	public ObservableList<String> getDatabasesShowed() {
+		return this.databases;
+	}
 
+	// queryArea && errors
 	public String getQuery() {
 		return query.getText();
 	}
 	
 	public void resetQuery() {
-		this.query.setText("");
+		query.setText("");
 	}
 	
-	public void setSqlError(String text) {
-		this.sqlError.setText(text);
+	public StringProperty getObservableQueryText() {
+		return obsQueryText;
 	}
 	
+	public void addError(QueryError toAdd) {
+		errors.add(toAdd);
+	}
+	
+	public void resetErrors() {
+		errors.removeAll(errors);
+	}
+	
+	// isConnected
+	public boolean isConnected() {
+		return isConnected;
+	}
+	
+	/* ALTRE COSE */
+	
+	// styling css
 	public void addCssStyle(String style) {
-		if (style == null)
-			throw new IllegalArgumentException("style == null");
+		validate("style is null", style);
 		rootNode.getStylesheets().add(cssPath);
 	}
 	
-	public Optional<String> getDatabaseRequested() {
-		if (this.databaseRequested.isPresent()) {
-			String result = databaseRequested.get();
-			databaseRequested = Optional.empty();
-			return Optional.of(result);
-		}
-		else
-			return Optional.empty();
-	}
-	
+	// per settare il salvataggio della cronologia delle query..
 	public Optional<Path> getExportingPath() {
 		
 		if (this.exportingPath.isPresent()) {
@@ -250,14 +251,9 @@ public class ClientInput extends Stage {
 		
 	}
 	
-	public StringProperty getObservableQueryText() {
-		return this.obsQueryText;
-	}
-	
-	// altre cose
-	
+	// per dire alla view se siamo connessi o no..
 	public void setConnection(boolean conn) {
-		this.isConnected = conn;
+		isConnected = conn;
 		
 		if (isConnected == false) {
 			this.connection.setText("connect");
@@ -273,8 +269,100 @@ public class ClientInput extends Stage {
 		}
 	}
 	
-	public boolean isConnected() {
-		return this.isConnected;
+	// restituisce il path del database da aggiungere o eliminare..
+	public Optional<String> getDatabaseToAddOrDelete() {
+		if ( databaseToAddOrDelete.isPresent() ) {
+			String value = databaseToAddOrDelete.get();
+			databaseToAddOrDelete = Optional.empty();
+			return Optional.of(value);
+		}
+		else
+			return databaseToAddOrDelete;
 	}
+	
+	/* METODI PRIVATI PER LEGGIBILITA' E UTILITA' */
+	
+	private void initQueryArea() {
+		query = new TextArea();
+		query.setWrapText(true);
+		VBox.setVgrow(query, Priority.ALWAYS);
+		obsQueryText = query.textProperty();
+	}
+	
+	private void initErrorsTable() {
+		errors = FXCollections.observableArrayList();
+		errorsTable = new TableView<QueryError>(errors);
+		errorsTable.setMaxHeight(150);
+		errorsTable.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+		
+		TableColumn<QueryError, LocalDateTime> dataCol = new TableColumn<>("Date");
+		dataCol.setCellValueFactory(new PropertyValueFactory<>("timeCreation"));
+		TableColumn<QueryError, String> errorCode = new TableColumn<>("Error Code");
+		errorCode.setCellValueFactory(new PropertyValueFactory<>("errorCode"));
+		TableColumn<QueryError, String> description = new TableColumn<>("Description");
+		description.setCellValueFactory(new PropertyValueFactory<>("description"));
+		
+		/*
+		dataCol.maxWidthProperty().bind(errorsTable.widthProperty().multiply(0.25));
+		dataCol.minWidthProperty().bind(errorsTable.widthProperty().multiply(0.10));
+		errorCode.maxWidthProperty().bind(errorsTable.widthProperty().multiply(0.25));
+		*/
+		
+		dataCol.setPrefWidth(110);
+		dataCol.setResizable(false);
+		errorCode.setPrefWidth(110);
+		dataCol.setResizable(false);
+		
+		description.prefWidthProperty().bind(errorsTable.widthProperty().subtract(dataCol.getWidth() + errorCode.getWidth() + 2));
+		
+		errorsTable.getColumns().add(dataCol);
+		errorsTable.getColumns().add(errorCode);
+		errorsTable.getColumns().add(description);
+		
+	}
+	
+	private void initSendQuery() {
+		sendQuery = new Button("Send Query");
+		sendQuery.setMaxWidth(Double.MAX_VALUE);
+		sendQuery.setOnAction( ev -> this.fireEvent(new ClientInputEvent(this, ClientInputEvent.SUBMIT_QUERY_REQUEST)));
+	}
+	
+	private void initConnectionButton() {
+		connection = new Button("connect");
+		isConnected = false;
+		connection.setMinWidth(100);
+		
+		connection.setOnAction( ev -> {
+			if (isConnected == false)
+				this.fireEvent(new ClientInputEvent(this, ClientInputEvent.CONNECTION_REQUEST));
+			else
+				this.fireEvent(new ClientInputEvent(this, ClientInputEvent.DISCONNECTION_REQUEST)); });
+	}
+	
+	private void initDatabasePaths(ObservableList<String> databases) {
+		this.databases = databases;
+		this.databasePath = new ComboBox<>(this.databases);
+		if (!databases.isEmpty()) { databasePath.getSelectionModel().select(0); }
+		databasePath.setMinWidth(100);
+		HBox.setHgrow(databasePath, Priority.ALWAYS);
+	}
+	
+	private void initPasswordAndUsername(String username) {
+		this.username = new TextField(username);
+		this.username.setPromptText("username");
+		HBox.setHgrow(this.username, Priority.ALWAYS);
+		password = new PasswordField();
+		password.setPromptText("password");
+		HBox.setHgrow(this.password, Priority.ALWAYS);
+	}
+	
+	private void validate(String descError, Object...objects) {
+		
+		for ( Object ob : objects )
+			if ( ob == null )
+				throw new NullPointerException(descError);
+		
+	}
+	
 	
 }

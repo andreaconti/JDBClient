@@ -1,4 +1,4 @@
-package jdbc.view;
+package jdbc.view.clientInput;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -19,6 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
+import jdbc.view.UserDialog;
 
 class ExportingFileForm extends Dialog<Pair<Path, ExportingFileOption>> {
 	

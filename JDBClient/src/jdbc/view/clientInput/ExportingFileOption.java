@@ -1,4 +1,4 @@
-package jdbc.view;
+package jdbc.view.clientInput;
 
 public enum ExportingFileOption {
 	
