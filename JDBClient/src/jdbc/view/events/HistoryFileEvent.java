@@ -1,6 +1,7 @@
 package jdbc.view.events;
 
-import javafx.event.Event;
+import java.nio.file.Path;
+
 import javafx.event.EventType;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
@@ -8,19 +9,19 @@ import jdbc.exporter.ExportingOptions;
 public class HistoryFileEvent extends ClientEvent {
 
 	private static final long serialVersionUID = 1L;
-	public static final EventType<? extends ClientEvent> ANY = new EventType<>(ClientEvent.ANY, "Any HistoryFileEvent");
+	public static final EventType<? extends HistoryFileEvent> ANY = new EventType<>(ClientEvent.ANY, "Any HistoryFileEvent");
 	
 	private ExportingOptions exportingOptions;
 	private ExportingFormat exportingFormats;
-	private String databasePath;
+	private Path exportingPath;
 	
 	
-	public HistoryFileEvent(EventType<? extends Event> eventType, ExportingOptions exportingOptions,
-			ExportingFormat exportingFormats, String databasePath) {
+	public HistoryFileEvent(EventType<? extends HistoryFileEvent> eventType, ExportingOptions exportingOptions,
+			ExportingFormat exportingFormats, Path exportingPath) {
 		super(eventType);
 		this.exportingOptions = exportingOptions;
 		this.exportingFormats = exportingFormats;
-		this.databasePath = databasePath;
+		this.exportingPath = exportingPath;
 	}
 
 	public ExportingOptions getExportingOptions() {
@@ -33,8 +34,8 @@ public class HistoryFileEvent extends ClientEvent {
 	}
 
 
-	public String getDatabasePath() {
-		return databasePath;
+	public Path getDatabasePath() {
+		return exportingPath;
 	}
 
 }

@@ -1,7 +1,9 @@
 package jdbc.view;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 import com.sun.glass.ui.Screen;
@@ -15,6 +17,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import jdbc.exporter.ExportingFormat;
+import jdbc.exporter.ExportingOptions;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 
@@ -159,6 +163,20 @@ public class UserDialog {
 	
 	public Optional<File> chooseDirectory(String title) {
 		return chooseDirectory(title, Paths.get(System.getProperty("user.home")).toFile());
+	}
+	
+	public ExportingFileForm chooseExportingDirectoryWithOptionsAndFormat(Path oldDirectory, 
+											List<ExportingOptions> exportingOptions,
+											List<ExportingFormat> exportingFormats) {
+		ExportingFileForm chooser = new ExportingFileForm(oldDirectory, exportingOptions, exportingFormats);
+		chooser.showAndWait();
+		return chooser;
+		
+	}
+	
+	public ExportingFileForm chooseExportingDirectoryWithOptionsAndFormat( List<ExportingOptions> exportingOptions,
+											List<ExportingFormat> exportingFormats) {
+		return this.chooseExportingDirectoryWithOptionsAndFormat(Paths.get(""), exportingOptions, exportingFormats);
 	}
 	
 	

@@ -1,15 +1,15 @@
 package jdbc.view;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 
 import javafx.stage.Screen;
+import jdbc.exporter.ExportingFormat;
+import jdbc.exporter.ExportingOptions;
 import jdbc.view.clientInput.ClientInput;
 import jdbc.view.clientOutput.ClientOutput;
 import jdbc.view.events.*;
@@ -22,27 +22,22 @@ public class ClientUIController {
 	private final double width = Screen.getPrimary().getVisualBounds().getWidth() / 3;
 	private final double height = Screen.getPrimary().getVisualBounds().getWidth() / 4;
 	
-	private Map<EventHandler<? extends ClientEvent>, EventType<? extends ClientEvent>> handlersForClientOuput = new HashMap<>();
-	
 	/* COSTRUTTORI */
-	public ClientUIController(String username, ObservableList<String> databases) {
-		mainView = new ClientInput(username, databases, width, height);
-		initFiringEvents();
+	public ClientUIController(String username, ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
+		mainView = new ClientInput(username, databases, optionsList, formatsList, width, height);
+		mainView.setOptionsList(Arrays.asList(ExportingOptions.values()));
 	}
 	
-	public ClientUIController(String username) {
-		mainView = new ClientInput(username, width, height);
-		initFiringEvents();
+	public ClientUIController(String username, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
+		mainView = new ClientInput(username, optionsList, formatsList,  width, height);
 	}
 	
-	public ClientUIController(ObservableList<String> databases) {
-		mainView = new ClientInput(databases, width, height);
-		initFiringEvents();
+	public ClientUIController(ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
+		mainView = new ClientInput(databases, optionsList, formatsList, width, height);
 	}
 	
-	public ClientUIController() {
-		mainView = new ClientInput(width, height);
-		initFiringEvents();
+	public ClientUIController(List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
+		mainView = new ClientInput(optionsList, formatsList, width, height);
 	}
 	
 	/* TUTTI I GETTERS E SETTER */
@@ -97,6 +92,10 @@ public class ClientUIController {
 		mainView.show();
 	}
 	
+	public void hide() {
+		mainView.hide();
+	}
+	
 	public void showResults(List<QueryResult> results) {
 		double width = Screen.getPrimary().getVisualBounds().getWidth() / 3;
 		double height = Screen.getPrimary().getVisualBounds().getWidth() / 4;
@@ -106,60 +105,36 @@ public class ClientUIController {
 	
 	/* METODI PER GESTIRE GLI EVENTI DELLA UI */
 	
-	public void addAddRemoveDatabaseEventHandler( EventHandler<AddRemoveDatabaseEvent> handler, EventType<? extends AddRemoveDatabaseEvent> type) {
-		mainView.addEventHandler(type, handler);
+	public void addAddRemoveDatabaseEventHandler(EventType<AddRemoveDatabaseEvent> type, EventHandler<AddRemoveDatabaseEvent> handler) {
+		mainView.addAddRemoveDatabaseEventHandler(type, handler);
 	}
-	public void addConnectionEventHandler( EventHandler<ConnectionEvent> handler, EventType<? extends ConnectionEvent> type) {
-		mainView.addEventHandler(type, handler);
+	public void addConnectionEventHandler(EventType<ConnectionEvent> type, EventHandler<ConnectionEvent> handler) {
+		mainView.addConnectionEventHandler(type, handler);
 	}
-	public void addExportQueryResultEventHandler( EventHandler<ExportQueryResultEvent> handler, EventType<? extends ExportQueryResultEvent> type) {
-		handlersForClientOuput.put(handler, type);
+	public void addSendQueryEventHandler(EventType<SendQueryEvent> type, EventHandler<SendQueryEvent> handler) {
+		mainView.addSendQueryEventHandler(type, handler);
 	}
-	public void addHistoryFileEventHandler( EventHandler<HistoryFileEvent> handler, EventType<? extends HistoryFileEvent> type) {
-		mainView.addEventHandler(type, handler);
+	public void addHistoryFileEventHandler(EventType<HistoryFileEvent> type, EventHandler<HistoryFileEvent> handler) {
+		mainView.addHistoryFileEventHandler(type, handler);
+	}
+	public void addExportQueryResultEventHandler(EventType<SendQueryEvent> type, EventHandler<SendQueryEvent> handler) {
+		// TODO
+	}
+	
+	public void removeAddRemoveDatabaseEventHandler(EventType<AddRemoveDatabaseEvent> type, EventHandler<AddRemoveDatabaseEvent> handler) {
+		mainView.removeAddRemoveDatabaseEventHandler(type, handler);
+	}
+	public void removeConnectionEventHandler(EventType<ConnectionEvent> type, EventHandler<ConnectionEvent> handler) {
+		mainView.removeConnectionEventHandler(type, handler);
+	}
+	public void removeSendQueryEventHandler(EventType<SendQueryEvent> type, EventHandler<SendQueryEvent> handler) {
+		mainView.removeSendQueryEventHandler(type, handler);
+	}
+	public void removeHistoryFileEventHandler(EventType<HistoryFileEvent> type, EventHandler<HistoryFileEvent> handler) {
+		mainView.removeHistoryFileEventHandler(type, handler);
+	}
+	public void removeExportQueryResultEventHandler(EventType<SendQueryEvent> type, EventHandler<SendQueryEvent> handler) {
+		// TODO
 	}
 
-	/* METODI PRIVATI PER SPARARE EVENTI */
-
-	private void initFiringEvents() {
-
-		mainView.addListenerOnAddDatabaseRequest( ev -> {
-			Optional<String> db = mainView.getDatabaseToAddOrDelete();
-			if (db.isPresent()) {
-				AddRemoveDatabaseEvent toFire = new AddRemoveDatabaseEvent(AddRemoveDatabaseEvent.ADD_DATABASE_REQUEST, db.get());
-				mainView.fireEvent(toFire);
-			}
-		});
-		
-		mainView.addListenerOnDeleteDatabaseRequest( ev -> {
-			Optional<String> db = mainView.getDatabaseToAddOrDelete();
-			if (db.isPresent()) {
-				AddRemoveDatabaseEvent toFire = new AddRemoveDatabaseEvent(AddRemoveDatabaseEvent.REMOVE_DATABASE_REQUEST, db.get());
-				mainView.fireEvent(toFire);
-			}
-		});
-		
-		mainView.addListenerOnConnectionRequest( ev -> {
-			ConnectionEvent toFire = new ConnectionEvent(this, this.getUsername(), this.getPassword(), mainView.getdatabaseURLSelected(), ConnectionEvent.CONNECTION_REQUEST);
-			mainView.fireEvent(toFire);
-		});
-		
-		mainView.addListenerOnDisconnectionRequest( ev -> {
-			ConnectionEvent toFire = new ConnectionEvent(this, this.getUsername(), this.getPassword(), mainView.getdatabaseURLSelected(), ConnectionEvent.DISCONNECTION_REQUEST);
-			mainView.fireEvent(toFire);
-		});
-		
-		mainView.addListenerOnExportOnFileRequest( ev -> {
-			HistoryFileEvent toFire = new HistoryFileEvent(HistoryFileEvent.ANY, 
-					mainView.getExportingOptionsSelected().get(), 
-					mainView.getExportingFormatSelected().get(), 
-					mainView.getdatabaseURLSelected());
-			mainView.fireEvent(toFire);
-		});
-		
-		mainView.addListenerOnQueryRequest( ev -> {
-			SendQueryEvent toFire = new SendQueryEvent(SendQueryEvent.ANY, this, mainView.getQuery());
-			mainView.fireEvent(toFire);
-		});
-	}
 }

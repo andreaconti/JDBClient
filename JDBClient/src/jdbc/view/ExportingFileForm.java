@@ -1,8 +1,9 @@
-package jdbc.view.clientInput;
+package jdbc.view;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 import com.sun.glass.ui.Screen;
@@ -18,14 +19,13 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.util.Pair;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
 import jdbc.view.*;
 
-class ExportingFileForm extends Dialog<Path> {
+public class ExportingFileForm extends Dialog<Path> {
 	
-	private TextField directoryChoosed;
+	private TextField directoryChoosen;
 	private Button browse;
 	private ComboBox<ExportingOptions> options;
 	private ComboBox<ExportingFormat> format;
@@ -34,18 +34,18 @@ class ExportingFileForm extends Dialog<Path> {
 	private ButtonType ok;
 	private Path result;
 
-	public ExportingFileForm(Path oldDirectory) {
+	public ExportingFileForm(Path oldDirectory, List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats ) {
 		
 		VBox rootNode = new VBox(10);
 		
 		// imposto directoryChoosed
-		directoryChoosed = new TextField();
-		directoryChoosed.setMinWidth(Screen.getMainScreen().getWidth() / 3);
-		directoryChoosed.setEditable(false);
-		directoryChoosed.setPromptText("Here There is the path choosen");
+		directoryChoosen = new TextField();
+		directoryChoosen.setMinWidth(Screen.getMainScreen().getWidth() / 3);
+		directoryChoosen.setEditable(false);
+		directoryChoosen.setPromptText("Here There is the path choosen");
 		if (oldDirectory != null)
-			directoryChoosed.setText(oldDirectory.toString());
-		HBox.setHgrow(directoryChoosed, Priority.ALWAYS);
+			directoryChoosen.setText(oldDirectory.toString());
+		HBox.setHgrow(directoryChoosen, Priority.ALWAYS);
 		
 		// imposto tasto browse
 		browse = new Button("Browse");
@@ -55,21 +55,21 @@ class ExportingFileForm extends Dialog<Path> {
 			Optional<File> result = d.chooseDirectory(oldDirectory != null ? oldDirectory.toFile() : Paths.get(System.getProperty("user.home")).toFile());
 			if ( result.isPresent()) {
 				this.result = result.get().toPath();
-				directoryChoosed.setText(result.get().toString());
+				directoryChoosen.setText(result.get().toString());
 			}
 		});
 		
 		HBox browsingBar = new HBox(10);
-		browsingBar.getChildren().addAll(directoryChoosed, browse);
+		browsingBar.getChildren().addAll(directoryChoosen, browse);
 		
 		// imposto options e format
-		options = new ComboBox<>(FXCollections.observableArrayList(ExportingOptions.values()));
+		options = new ComboBox<>(FXCollections.observableArrayList(exportingOptions));
 		options.setMinWidth(Screen.getMainScreen().getWidth() / 3);
-		options.getSelectionModel().select(ExportingOptions.ALL);
+		options.getSelectionModel().select(0);
 		
-		format = new ComboBox<ExportingFormat>(FXCollections.observableArrayList(ExportingFormat.values()));
+		format = new ComboBox<ExportingFormat>(FXCollections.observableArrayList(exportingFormats));
 		format.setMinWidth(Screen.getMainScreen().getWidth() / 3);
-		format.getSelectionModel().select(ExportingFormat.TXT);
+		format.getSelectionModel().select(0);
 		
 		close = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 		ok = new ButtonType("Done", ButtonData.OK_DONE);
@@ -88,22 +88,26 @@ class ExportingFileForm extends Dialog<Path> {
 		Node enablerOk = this.getDialogPane().lookupButton(ok);
 		enablerOk.setDisable(true);
 		
-		directoryChoosed.textProperty().addListener( (obs, oldV, newV) -> {
-			enablerOk.setDisable(directoryChoosed.getText().trim().isEmpty());
+		directoryChoosen.textProperty().addListener( (obs, oldV, newV) -> {
+			enablerOk.setDisable(directoryChoosen.getText().trim().isEmpty());
 		});
 		
 	}
 	
-	public ExportingFileForm( Optional<Path> oldDirectory ) {
-		this( oldDirectory.isPresent() ? oldDirectory.get() : null );
+	public ExportingFileForm( List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats) {
+		this( Paths.get(""), exportingOptions, exportingFormats );
 	}
 	
-	public ExportingOptions getExportingOptionsSelected() {
+	public ExportingOptions getExportingOptionSelected() {
 		return options.getSelectionModel().getSelectedItem();
 	}
 	
 	public ExportingFormat getExportingFormatSelected() {
 		return format.getSelectionModel().getSelectedItem();
+	}
+	
+	public Optional<Path> getDirectorySelected() {
+		return Optional.ofNullable(result);
 	}
 
 

@@ -2,6 +2,7 @@ package jdbc.view.clientInput;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -29,11 +30,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
+import jdbc.view.ExportingFileForm;
 import jdbc.view.QueryError;
 import jdbc.view.UserDialog;
 import jdbc.view.events.AddRemoveDatabaseEvent;
 import jdbc.view.events.ConnectionEvent;
 import jdbc.view.events.HistoryFileEvent;
+import jdbc.view.events.SendQueryEvent;
 
 public class ClientInput extends Stage {
 	
@@ -62,12 +65,16 @@ public class ClientInput extends Stage {
 	private Optional<ExportingFormat> exportingFormat = Optional.empty();
 	private StringProperty obsQueryText = new SimpleStringProperty();
 	private boolean isConnected = false;
+	private List<ExportingOptions> optionsList;
+	private List<ExportingFormat> formatsList;
 	
 	// styling
 	private String cssPath;
 
 	/* COSTRUTTORI */
-	public ClientInput(String username, ObservableList<String> databases, double width, double height) {
+
+	
+	public ClientInput(String username, ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, double width, double height) {
 		
 		validate("username or databases list is null", username, databases );
 		if ( width < 0 || height < 0 )
@@ -92,31 +99,36 @@ public class ClientInput extends Stage {
 		initErrorsTable();
 		initSendQuery();
 		
+		this.optionsList = optionsList;
+		this.formatsList = formatsList;
+		
 		rootNode.getChildren().addAll(setMainMenu(),HighToolbar, query, errorsTable, sendQuery);
 	}
 	
-	public ClientInput(ObservableList<String> databases, double width, double height) {
-		this("", databases, width, height);
+	public ClientInput(ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, double width, double height) {
+		this("", databases, optionsList, formatsList, width, height);
 	}
 	
-	public ClientInput(String username, double width, double height) {
-		this(username, FXCollections.observableArrayList(), width, height);
+	public ClientInput(String username,List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, double width, double height) {
+		this(username, FXCollections.observableArrayList(), optionsList, formatsList, width, height);
 	}
 	
-	public ClientInput(double width, double height) {
-		this("", FXCollections.observableArrayList(), width, height);
+	public ClientInput(List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, double width, double height) {
+		this("", FXCollections.observableArrayList(), optionsList, formatsList, width, height);
 	}
 	
 	// listeners
 	
-	public void addListenerOnConnectionRequest(ClientInputEventHandler handler) { this.addEventHandler(ClientInputEvent.CONNECTION_REQUEST, handler); }
-	public void addListenerOnDisconnectionRequest(ClientInputEventHandler handler) { this.addEventHandler(ClientInputEvent.DISCONNECTION_REQUEST, handler); }
-	public void addListenerOnQueryRequest(ClientInputEventHandler handler) { this.addEventHandler(ClientInputEvent.SUBMIT_QUERY_REQUEST, handler); }
-	public void addListenerOnExportOnFileRequest(ClientInputEventHandler handler) { this.addEventHandler(ClientInputEvent.EXPORT_ON_FILE, handler); }
-	public void addListenerOnExportOnTxtFileOnlyResultsRequest(ClientInputEventHandler handler) { this.addEventHandler(ClientInputEvent.EXPORT_ON_TXT_FILE_ONLY_RESULTS, handler); }
-	public void addListenerOnExportOnTxtFileAllRequest(ClientInputEventHandler handler) { this.addEventHandler(ClientInputEvent.EXPORT_ON_TXT_FILE_ALL, handler); }
-	public void addListenerOnDeleteDatabaseRequest(ClientInputEventHandler handler) { this.addEventHandler(ClientInputEvent.REMOVE_DATABASE_REQUEST, handler); }
-	public void addListenerOnAddDatabaseRequest(ClientInputEventHandler handler) { this.addEventHandler(ClientInputEvent.ADD_DATABASE_REQUEST, handler); }
+	public void addAddRemoveDatabaseEventHandler(EventType<AddRemoveDatabaseEvent> type , EventHandler<AddRemoveDatabaseEvent> handler) { this.addEventHandler(type, handler); }
+	public void addConnectionEventHandler(EventType<ConnectionEvent> type , EventHandler<ConnectionEvent> handler) { this.addEventHandler(type, handler); }
+	public void addHistoryFileEventHandler(EventType<HistoryFileEvent> type , EventHandler<HistoryFileEvent> handler) { this.addEventHandler(type, handler); }
+	public void addSendQueryEventHandler(EventType<SendQueryEvent> type , EventHandler<SendQueryEvent> handler) { this.addEventHandler(type, handler); }
+	
+	public void removeAddRemoveDatabaseEventHandler(EventType<AddRemoveDatabaseEvent> type , EventHandler<AddRemoveDatabaseEvent> handler) { this.removeEventHandler(type, handler); }
+	public void removeConnectionEventHandler(EventType<ConnectionEvent> type , EventHandler<ConnectionEvent> handler) { this.removeEventHandler(type, handler); }
+	public void removeHistoryFileEventHandler(EventType<HistoryFileEvent> type , EventHandler<HistoryFileEvent> handler) { this.removeEventHandler(type, handler); }
+	public void removeSendQueryEventHandler(EventType<SendQueryEvent> type , EventHandler<SendQueryEvent> handler) { this.removeEventHandler(type, handler); }
+	
 	
 	// set mainMenu
 	
@@ -139,7 +151,8 @@ public class ClientInput extends Stage {
 					Optional<String> string = dialog.askForString("Archive Database", "Write here the complete path of the database..");
 					if (string.isPresent()) {
 						this.databaseToAddOrDelete = string;
-						this.fireEvent(new ClientInputEvent(this, ClientInputEvent.ADD_DATABASE_REQUEST));
+						AddRemoveDatabaseEvent toFire = new AddRemoveDatabaseEvent(AddRemoveDatabaseEvent.ADD_DATABASE_REQUEST, this.getDatabaseToAddOrDelete().get());
+						this.fireEvent(toFire);
 					}
 				});
 				
@@ -148,7 +161,8 @@ public class ClientInput extends Stage {
 					if ( toDelete != null ) {
 						System.out.println(toDelete);
 						this.databaseToAddOrDelete = Optional.of(toDelete);
-						this.fireEvent(new ClientInputEvent(this, ClientInputEvent.REMOVE_DATABASE_REQUEST));
+						AddRemoveDatabaseEvent toFire = new AddRemoveDatabaseEvent(AddRemoveDatabaseEvent.REMOVE_DATABASE_REQUEST, this.getDatabaseToAddOrDelete().get());
+						this.fireEvent(toFire);
 					}
 				});
 				
@@ -161,13 +175,23 @@ public class ClientInput extends Stage {
 				exporting.getItems().add(exportOnFile);
 				
 				exportOnFile.setOnAction( ev -> {
-					ExportingFileForm chooser = new ExportingFileForm( exportingPath );
-					Optional<Path> path = chooser.showAndWait();
+					UserDialog d = new UserDialog();
+					ExportingFileForm chooser;
+					if ( exportingPath.isPresent() )
+						chooser = d.chooseExportingDirectoryWithOptionsAndFormat(exportingPath.get(), optionsList, formatsList);
+					else
+						chooser = d.chooseExportingDirectoryWithOptionsAndFormat(optionsList, formatsList);
+					
+					Optional<Path> path = chooser.getDirectorySelected();
 					if ( path.isPresent() ) {
 						this.exportingPath = Optional.of(path.get());
-						this.exportingOptions = Optional.ofNullable(chooser.getExportingOptionsSelected());
+						this.exportingOptions = Optional.ofNullable(chooser.getExportingOptionSelected());
 						this.exportingFormat = Optional.ofNullable(chooser.getExportingFormatSelected());
-						this.fireEvent(new ClientInputEvent(this, ClientInputEvent.EXPORT_ON_FILE));
+						HistoryFileEvent toFire = new HistoryFileEvent(HistoryFileEvent.ANY, 
+																		exportingOptions.get(), 
+																		exportingFormat.get(), 
+																		exportingPath.get() );
+						this.fireEvent(toFire);
 					}
 				});
 			}
@@ -182,6 +206,14 @@ public class ClientInput extends Stage {
 	}
 	
 	/* GETTERS && SETTERS */
+
+	public void setOptionsList(List<ExportingOptions> optionsList) {
+		this.optionsList = optionsList;
+	}
+
+	public void setFormatsList(List<ExportingFormat> formatsList) {
+		this.formatsList = formatsList;
+	}
 
 	// username and password
 	public String getUsername() {
@@ -349,7 +381,7 @@ public class ClientInput extends Stage {
 	private void initSendQuery() {
 		sendQuery = new Button("Send Query");
 		sendQuery.setMaxWidth(Double.MAX_VALUE);
-		sendQuery.setOnAction( ev -> this.fireEvent(new ClientInputEvent(this, ClientInputEvent.SUBMIT_QUERY_REQUEST)));
+		sendQuery.setOnAction( ev -> this.fireEvent(new SendQueryEvent(SendQueryEvent.ANY, this.getQuery())) );
 	}
 	
 	private void initConnectionButton() {
@@ -359,9 +391,10 @@ public class ClientInput extends Stage {
 		
 		connection.setOnAction( ev -> {
 			if (isConnected == false)
-				this.fireEvent(new ClientInputEvent(this, ClientInputEvent.CONNECTION_REQUEST));
+				this.fireEvent(new ConnectionEvent(ConnectionEvent.CONNECTION_REQUEST, username.getText(), password.getText(), getdatabaseURLSelected()) );
 			else
-				this.fireEvent(new ClientInputEvent(this, ClientInputEvent.DISCONNECTION_REQUEST)); });
+				this.fireEvent(new ConnectionEvent(ConnectionEvent.DISCONNECTION_REQUEST, username.getText(), password.getText(), getdatabaseURLSelected()) );
+		});
 	}
 	
 	private void initDatabasePaths(ObservableList<String> databases) {

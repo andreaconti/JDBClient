@@ -1,16 +1,12 @@
 package jdbc.starter;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import jdbc.exporter.ExportingFormat;
+import jdbc.exporter.ExportingOptions;
 import jdbc.view.ClientUIController;
-import jdbc.view.QueryResult;
-import jdbc.view.Tuple;
-import jdbc.view.clientInput.ClientInput;
-import jdbc.view.clientOutput.ClientOutput;
-import jdbc.view.events.AddRemoveDatabaseEvent;
 
 public class starter extends Application {
 
@@ -20,7 +16,6 @@ public class starter extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-
 	}
 
 }

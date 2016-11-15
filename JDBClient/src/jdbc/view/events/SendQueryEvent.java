@@ -9,17 +9,11 @@ public class SendQueryEvent extends ClientEvent {
 
 	private static final long serialVersionUID = 1L;
 	
-	private ClientUIController sender;
 	private String query;
 	
-	public SendQueryEvent(EventType<? extends SendQueryEvent> eventType, ClientUIController sender, String query) {
+	public SendQueryEvent(EventType<? extends SendQueryEvent> eventType, String query) {
 		super(eventType);
-		this.sender = sender;
 		this.query = query;
-	}
-
-	public ClientUIController getSender() {
-		return sender;
 	}
 
 	public String getQuery() {

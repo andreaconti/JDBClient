@@ -1,7 +1,6 @@
 package jdbc.view.events;
 
 import javafx.event.EventType;
-import jdbc.view.ClientUIController;
 
 public class ConnectionEvent extends ClientEvent {
 	
@@ -12,20 +11,15 @@ public class ConnectionEvent extends ClientEvent {
 	public static final EventType<? extends ClientEvent> CONNECTION_REQUEST = new EventType<>(ConnectionEvent.ANY_CONNECTION_REQUEST, "Connection Request");
 	public static final EventType<? extends ClientEvent> DISCONNECTION_REQUEST = new EventType<>(ConnectionEvent.ANY_CONNECTION_REQUEST, "Disconnection Request");
 	
-	private ClientUIController source;
 	private String username;
 	private String password;
 	private String databasePath;
 
-	public ConnectionEvent(ClientUIController source, String username, String password, String databasePath, EventType<? extends ClientEvent> eventType) {
+	public ConnectionEvent(EventType<? extends ClientEvent> eventType, String username, String password, String databasePath) {
 		super(eventType);
 		this.username = username;
 		this.databasePath = databasePath;
 		this.password = password;
-	}
-
-	public ClientUIController getSource() {
-		return source;
 	}
 
 	public String getUsername() {
