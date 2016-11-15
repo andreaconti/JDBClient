@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import javafx.geometry.Insets;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.VBox;
+import jdbc.view.QueryResult;
 
 public class QueryResultView extends VBox {
 	

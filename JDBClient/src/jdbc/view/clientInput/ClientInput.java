@@ -8,6 +8,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -25,9 +27,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Pair;
+import jdbc.exporter.ExportingFormat;
+import jdbc.exporter.ExportingOptions;
 import jdbc.view.QueryError;
 import jdbc.view.UserDialog;
+import jdbc.view.events.AddRemoveDatabaseEvent;
+import jdbc.view.events.ConnectionEvent;
+import jdbc.view.events.HistoryFileEvent;
 
 public class ClientInput extends Stage {
 	
@@ -49,9 +55,11 @@ public class ClientInput extends Stage {
 	// toolbar in basso
 	private Button sendQuery;
 	
-	// elementi utili e di utilizzo 
+	// elementi per informazioni in seguito ad eventi e settabili..
 	private Optional<String> databaseToAddOrDelete = Optional.empty();
 	private Optional<Path> exportingPath = Optional.empty();
+	private Optional<ExportingOptions> exportingOptions = Optional.empty();
+	private Optional<ExportingFormat> exportingFormat = Optional.empty();
 	private StringProperty obsQueryText = new SimpleStringProperty();
 	private boolean isConnected = false;
 	
@@ -149,15 +157,17 @@ public class ClientInput extends Stage {
 			
 			Menu exporting = new Menu("Exporting Options");
 			{
-				MenuItem exportOnFile = new MenuItem("Export on a .txt file");
+				MenuItem exportOnFile = new MenuItem("Save Query on a file");
 				exporting.getItems().add(exportOnFile);
 				
 				exportOnFile.setOnAction( ev -> {
 					ExportingFileForm chooser = new ExportingFileForm( exportingPath );
-					Optional<Pair<Path, ExportingFileOption>> pathWithOptions = chooser.showAndWait();
-					if ( pathWithOptions.isPresent() ) {
-						this.exportingPath = Optional.of(pathWithOptions.get().getKey());
-						this.fireEvent(new ClientInputEvent(this, ClientInputEvent.EXPORT_ON_TXT_FILE_ALL));
+					Optional<Path> path = chooser.showAndWait();
+					if ( path.isPresent() ) {
+						this.exportingPath = Optional.of(path.get());
+						this.exportingOptions = Optional.ofNullable(chooser.getExportingOptionsSelected());
+						this.exportingFormat = Optional.ofNullable(chooser.getExportingFormatSelected());
+						this.fireEvent(new ClientInputEvent(this, ClientInputEvent.EXPORT_ON_FILE));
 					}
 				});
 			}
@@ -248,7 +258,28 @@ public class ClientInput extends Stage {
 		}
 		else
 			return Optional.empty();
+	}
+	
+	public Optional<ExportingFormat> getExportingFormatSelected() {
 		
+		if (this.exportingFormat.isPresent()) {
+			ExportingFormat result = exportingFormat.get();
+			exportingFormat = Optional.empty();
+			return Optional.of(result);
+		}
+		else
+			return Optional.empty();
+	}
+	
+	public Optional<ExportingOptions> getExportingOptionsSelected() {
+		
+		if (this.exportingOptions.isPresent()) {
+			ExportingOptions result = exportingOptions.get();
+			exportingOptions = Optional.empty();
+			return Optional.of(result);
+		}
+		else
+			return Optional.empty();
 	}
 	
 	// per dire alla view se siamo connessi o no..
@@ -301,12 +332,6 @@ public class ClientInput extends Stage {
 		errorCode.setCellValueFactory(new PropertyValueFactory<>("errorCode"));
 		TableColumn<QueryError, String> description = new TableColumn<>("Description");
 		description.setCellValueFactory(new PropertyValueFactory<>("description"));
-		
-		/*
-		dataCol.maxWidthProperty().bind(errorsTable.widthProperty().multiply(0.25));
-		dataCol.minWidthProperty().bind(errorsTable.widthProperty().multiply(0.10));
-		errorCode.maxWidthProperty().bind(errorsTable.widthProperty().multiply(0.25));
-		*/
 		
 		dataCol.setPrefWidth(110);
 		dataCol.setResizable(false);

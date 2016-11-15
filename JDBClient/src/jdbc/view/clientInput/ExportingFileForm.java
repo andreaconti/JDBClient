@@ -19,13 +19,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Pair;
-import jdbc.view.UserDialog;
+import jdbc.exporter.ExportingFormat;
+import jdbc.exporter.ExportingOptions;
+import jdbc.view.*;
 
-class ExportingFileForm extends Dialog<Pair<Path, ExportingFileOption>> {
+class ExportingFileForm extends Dialog<Path> {
 	
 	private TextField directoryChoosed;
 	private Button browse;
-	private ComboBox<ExportingFileOption> options;
+	private ComboBox<ExportingOptions> options;
+	private ComboBox<ExportingFormat> format;
 	
 	private ButtonType close;
 	private ButtonType ok;
@@ -47,11 +50,7 @@ class ExportingFileForm extends Dialog<Pair<Path, ExportingFileOption>> {
 		// imposto tasto browse
 		browse = new Button("Browse");
 		browse.setOnAction( ev -> {
-			/*
-			DirectoryChooser chooser = new DirectoryChooser();
-			if ( oldDirectory != null ) chooser.setInitialDirectory(oldDirectory.toFile());
-			File result = chooser.showDialog(null);
-			*/
+
 			UserDialog d = new UserDialog();
 			Optional<File> result = d.chooseDirectory(oldDirectory != null ? oldDirectory.toFile() : Paths.get(System.getProperty("user.home")).toFile());
 			if ( result.isPresent()) {
@@ -63,21 +62,25 @@ class ExportingFileForm extends Dialog<Pair<Path, ExportingFileOption>> {
 		HBox browsingBar = new HBox(10);
 		browsingBar.getChildren().addAll(directoryChoosed, browse);
 		
-		// imposto options
-		options = new ComboBox<>(FXCollections.observableArrayList(ExportingFileOption.values()));
+		// imposto options e format
+		options = new ComboBox<>(FXCollections.observableArrayList(ExportingOptions.values()));
 		options.setMinWidth(Screen.getMainScreen().getWidth() / 3);
-		options.getSelectionModel().select(ExportingFileOption.TXT_FILE_ALL);
+		options.getSelectionModel().select(ExportingOptions.ALL);
+		
+		format = new ComboBox<ExportingFormat>(FXCollections.observableArrayList(ExportingFormat.values()));
+		format.setMinWidth(Screen.getMainScreen().getWidth() / 3);
+		format.getSelectionModel().select(ExportingFormat.TXT);
 		
 		close = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 		ok = new ButtonType("Done", ButtonData.OK_DONE);
 		this.getDialogPane().getButtonTypes().addAll(ok, close);
-		rootNode.getChildren().addAll(browsingBar, options);
+		rootNode.getChildren().addAll(browsingBar, options, format);
 		
 		this.getDialogPane().setContent(rootNode);
 		
 		this.setResultConverter( button -> {
 			if ( button == ok && result != null) 
-				return new Pair<Path, ExportingFileOption>(result, options.getSelectionModel().getSelectedItem());
+				return result;
 			else 
 				return null;
 		});
@@ -93,6 +96,14 @@ class ExportingFileForm extends Dialog<Pair<Path, ExportingFileOption>> {
 	
 	public ExportingFileForm( Optional<Path> oldDirectory ) {
 		this( oldDirectory.isPresent() ? oldDirectory.get() : null );
+	}
+	
+	public ExportingOptions getExportingOptionsSelected() {
+		return options.getSelectionModel().getSelectedItem();
+	}
+	
+	public ExportingFormat getExportingFormatSelected() {
+		return format.getSelectionModel().getSelectedItem();
 	}
 
 

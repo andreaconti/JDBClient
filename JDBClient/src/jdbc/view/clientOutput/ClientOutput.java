@@ -3,7 +3,6 @@ package jdbc.view.clientOutput;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -11,6 +10,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import jdbc.view.QueryResult;
 
 public class ClientOutput extends Stage {
 	
@@ -20,7 +20,7 @@ public class ClientOutput extends Stage {
 	// elementi grafici
 	Spinner<Integer> tableChooser;
 
-	public ClientOutput(List<QueryResult> results, int width, int height) {
+	public ClientOutput(List<QueryResult> results, double width, double height) {
 		
 		// checks
 		if ( results == null || results.isEmpty() )
@@ -49,7 +49,6 @@ public class ClientOutput extends Stage {
 		BorderPane.setAlignment(tableChooser, Pos.CENTER);
 		
 		rootNode.setBottom(tableChooser);
-		
 		
 	}
 

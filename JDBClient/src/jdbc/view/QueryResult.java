@@ -1,4 +1,4 @@
-package jdbc.view.clientOutput;
+package jdbc.view;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +9,6 @@ import javafx.collections.FXCollections;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import jdbc.view.QueryError;
 
 public class QueryResult {
 	

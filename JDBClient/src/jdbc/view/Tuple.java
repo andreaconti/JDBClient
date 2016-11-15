@@ -1,4 +1,4 @@
-package jdbc.view.clientOutput;
+package jdbc.view;
 
 import java.util.Arrays;
 import java.util.List;
