@@ -19,7 +19,7 @@ class QueryResultView extends VBox {
 		this.setPadding(new Insets(10,0,10,0));
 		
 		if ( toShow == null)
-			throw new NullPointerException("QueryResul == null not allowed");
+			throw new NullPointerException("QueryResult == null not allowed");
 		
 		this.description = new TextArea(toShow.getDescriptionOfResult());
 		this.errors = new TextArea(toShow.getErrorsToShow().stream().map(err -> err.getErrorCode() + " - " + err.getDescription()).collect(Collectors.joining("\n")));
@@ -29,5 +29,11 @@ class QueryResultView extends VBox {
 		this.getChildren().addAll(description, toShow.getTableResult(), errors);
 		
 	}
+
+	public QueryResult getQueryResult() {
+		return toShow;
+	}
+	
+	
 
 }

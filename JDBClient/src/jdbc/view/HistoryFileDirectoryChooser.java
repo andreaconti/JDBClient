@@ -23,20 +23,26 @@ import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
 import jdbc.view.*;
 
-public class ExportingFileForm extends Dialog<Path> {
+public class HistoryFileDirectoryChooser extends Dialog<Path> {
 	
-	private TextField directoryChoosen;
-	private Button browse;
-	private ComboBox<ExportingOptions> options;
-	private ComboBox<ExportingFormat> format;
+	protected TextField directoryChoosen;
+	protected Button browse;
+	protected ComboBox<ExportingOptions> options;
+	protected ComboBox<ExportingFormat> format;
 	
-	private ButtonType close;
-	private ButtonType ok;
-	private Path result;
+	protected ButtonType close;
+	protected ButtonType ok;
+	protected Path result;
+	
+	protected VBox rootNode;
 
-	public ExportingFileForm(Path oldDirectory, List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats ) {
+	public HistoryFileDirectoryChooser(Path oldDirectory, List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats ) {
 		
-		VBox rootNode = new VBox(10);
+		// checks
+		if ( exportingFormats == null || exportingOptions == null || exportingFormats.isEmpty() || exportingOptions.isEmpty() ) 
+			throw new IllegalArgumentException();
+		
+		rootNode = new VBox(10);
 		
 		// imposto directoryChoosed
 		directoryChoosen = new TextField();
@@ -94,7 +100,7 @@ public class ExportingFileForm extends Dialog<Path> {
 		
 	}
 	
-	public ExportingFileForm( List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats) {
+	public HistoryFileDirectoryChooser( List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats) {
 		this( Paths.get(""), exportingOptions, exportingFormats );
 	}
 	
@@ -106,7 +112,7 @@ public class ExportingFileForm extends Dialog<Path> {
 		return format.getSelectionModel().getSelectedItem();
 	}
 	
-	public Optional<Path> getDirectorySelected() {
+	public Optional<Path> getPathSelected() {
 		return Optional.ofNullable(result);
 	}
 

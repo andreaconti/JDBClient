@@ -16,6 +16,8 @@ public class starter extends Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
+		ClientUIController c = new ClientUIController(Arrays.asList(ExportingOptions.values()), Arrays.asList(ExportingFormat.values()));
+		c.show();
 	}
 
 }

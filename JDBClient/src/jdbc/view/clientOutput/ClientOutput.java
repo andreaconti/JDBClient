@@ -1,16 +1,26 @@
 package jdbc.view.clientOutput;
 
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import jdbc.exporter.ExportingFormat;
+import jdbc.exporter.ExportingOptions;
+import jdbc.view.ExportQueryFileChooser;
 import jdbc.view.QueryResult;
+import jdbc.view.UserDialog;
+import jdbc.view.events.ExportQueryResultEvent;
 
 public class ClientOutput extends Stage {
 	
@@ -19,13 +29,24 @@ public class ClientOutput extends Stage {
 	
 	// elementi grafici
 	Spinner<Integer> tableChooser;
+	
+	// altri valori
+	Path exportingPath;
+	List<ExportingOptions> exportingOptions;
+	List<ExportingFormat> exportingFormats;
 
-	public ClientOutput(List<QueryResult> results, double width, double height) {
+	public ClientOutput(List<QueryResult> results, List<ExportingOptions> exportingOptions,
+				List<ExportingFormat> exportingFormats, double width, double height) {
 		
 		// checks
-		if ( results == null || results.isEmpty() )
+		if ( results == null || results.isEmpty())
 			throw new IllegalArgumentException("Invalid QueryResult");
 		
+		if ( exportingFormats == null || exportingOptions == null )
+			throw new NullPointerException("(exportingFormats || exportingOptions) == null");
+		
+		this.exportingOptions = exportingOptions;
+		this.exportingFormats = exportingFormats;
 		this.results = results.stream().map(queryResult -> new QueryResultView(queryResult)).collect(Collectors.toList());
 		
 		BorderPane rootNode = new BorderPane();
@@ -49,6 +70,34 @@ public class ClientOutput extends Stage {
 		BorderPane.setAlignment(tableChooser, Pos.CENTER);
 		
 		rootNode.setBottom(tableChooser);
+		rootNode.setTop(initMainMenu());
+	}
+	
+	private MenuBar initMainMenu() {
+		
+		MenuBar mainMenu = new MenuBar();
+		mainMenu.setUseSystemMenuBar(true);
+		
+		Menu exportOption = new Menu("Exporting Options");
+		MenuItem exportQueryResult = new MenuItem("Export Query Results");
+		exportOption.getItems().add(exportQueryResult);
+		
+		exportQueryResult.setOnAction( ev -> {
+			UserDialog d = new UserDialog();
+			ExportQueryFileChooser chooser = d.chooseFilePathForExportingQueryResult(exportingPath, exportingOptions, exportingFormats);
+			Optional<Path> result = chooser.getPathSelected();
+			if ( result.isPresent() ) {
+				ExportQueryResultEvent toFire = new ExportQueryResultEvent(ExportQueryResultEvent.ANY,
+														results.get(tableChooser.getValue()).getQueryResult(),
+														chooser.getExportingFormatSelected(),
+														chooser.getExportingOptionSelected(),
+														chooser.isAppendRequested());
+				this.fireEvent(toFire);
+			}	
+		});
+		
+		mainMenu.getMenus().add(exportOption);
+		return mainMenu;
 		
 	}
 

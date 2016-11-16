@@ -15,12 +15,14 @@ public class ExportQueryResultEvent extends ClientEvent {
 	private QueryResult queryResult;
 	private ExportingFormat exportingFormat;
 	private ExportingOptions exportingOptions;
+	private boolean isAppendingRequested;
 	
-	public ExportQueryResultEvent(EventType<? extends Event> eventType, QueryResult queryResult, ExportingFormat exportingFormat, ExportingOptions exportingOptions) {
+	public ExportQueryResultEvent(EventType<? extends Event> eventType, QueryResult queryResult, ExportingFormat exportingFormat, ExportingOptions exportingOptions, boolean isAppendingRequested) {
 		super(eventType);
 		this.queryResult = queryResult;
 		this.exportingFormat = exportingFormat;
 		this.exportingOptions = exportingOptions;
+		this.isAppendingRequested = isAppendingRequested;
 	}
 
 	public QueryResult getQueryResult() {
@@ -33,6 +35,10 @@ public class ExportQueryResultEvent extends ClientEvent {
 
 	public ExportingOptions getExportingOptions() {
 		return exportingOptions;
+	}
+	
+	public boolean isAppendingRequested() {
+		return this.isAppendingRequested;
 	}
 
 }

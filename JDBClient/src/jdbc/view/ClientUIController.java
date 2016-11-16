@@ -21,11 +21,15 @@ public class ClientUIController {
 	private ClientInput mainView;
 	private final double width = Screen.getPrimary().getVisualBounds().getWidth() / 3;
 	private final double height = Screen.getPrimary().getVisualBounds().getWidth() / 4;
+	private List<ExportingOptions> exportingOptions;
+	private List<ExportingFormat> exportingFormats;
 	
 	/* COSTRUTTORI */
 	public ClientUIController(String username, ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
 		mainView = new ClientInput(username, databases, optionsList, formatsList, width, height);
 		mainView.setOptionsList(Arrays.asList(ExportingOptions.values()));
+		this.exportingFormats = exportingFormats;
+		this.exportingOptions = exportingOptions;
 	}
 	
 	public ClientUIController(String username, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
@@ -99,7 +103,7 @@ public class ClientUIController {
 	public void showResults(List<QueryResult> results) {
 		double width = Screen.getPrimary().getVisualBounds().getWidth() / 3;
 		double height = Screen.getPrimary().getVisualBounds().getWidth() / 4;
-		ClientOutput out = new ClientOutput(results, width, height);
+		ClientOutput out = new ClientOutput(results, exportingOptions, exportingFormats, width, height);
 		out.show();
 	}
 	
