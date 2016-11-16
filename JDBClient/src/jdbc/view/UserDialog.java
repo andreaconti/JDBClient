@@ -1,7 +1,9 @@
 package jdbc.view;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 import com.sun.glass.ui.Screen;
@@ -15,10 +17,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import jdbc.exporter.ExportingFormat;
+import jdbc.exporter.ExportingOptions;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 
-class UserDialog {
+public class UserDialog {
 	
 	private String cssPath;
 	
@@ -159,6 +164,62 @@ class UserDialog {
 	
 	public Optional<File> chooseDirectory(String title) {
 		return chooseDirectory(title, Paths.get(System.getProperty("user.home")).toFile());
+	}
+	
+	public Optional<File> showSaveFileDialog(String title, File initialDirectory) {
+		
+		validateObjects(title, initialDirectory);
+		
+		FileChooser f = new FileChooser();
+		f.setTitle(title);
+		f.setInitialDirectory(initialDirectory);
+		File result = f.showSaveDialog(null);
+		
+		if ( result == null )
+			return Optional.empty();
+		else
+			return Optional.of(result);
+		
+	}
+	
+	public Optional<File> showSaveFileDialog(File initialDirectory) {
+		return this.showSaveFileDialog("", initialDirectory);
+	}
+	
+	public Optional<File> showSaveFileDialog(String title) {
+		return this.showSaveFileDialog(title, Paths.get(System.getProperty("user.home")).toFile());
+	}
+	
+	public Optional<File> showSaveFileDialog() {
+		return this.showSaveFileDialog("", Paths.get(System.getProperty("user.home")).toFile());
+	}
+	
+	
+	public HistoryFileDirectoryChooser chooseExportingDirectoryWithOptionsAndFormat(Path oldDirectory, 
+											List<ExportingOptions> exportingOptions,
+											List<ExportingFormat> exportingFormats) {
+		HistoryFileDirectoryChooser chooser = new HistoryFileDirectoryChooser(oldDirectory, exportingOptions, exportingFormats);
+		chooser.showAndWait();
+		return chooser;
+		
+	}
+	
+	public HistoryFileDirectoryChooser chooseExportingDirectoryWithOptionsAndFormat( List<ExportingOptions> exportingOptions,
+											List<ExportingFormat> exportingFormats) {
+		return this.chooseExportingDirectoryWithOptionsAndFormat(Paths.get(System.getProperty("user.home")), exportingOptions, exportingFormats);
+	}
+	
+	public ExportQueryFileChooser chooseFilePathForExportingQueryResult(Path oldFilePath, 
+												List<ExportingOptions> exportingOptions,
+												List<ExportingFormat> exportingFormats) {
+		ExportQueryFileChooser chooser = new ExportQueryFileChooser(oldFilePath, exportingOptions, exportingFormats);
+		chooser.showAndWait();
+		return chooser;
+	}
+	
+	public ExportQueryFileChooser chooseFilePathForExportingQueryResult(List<ExportingOptions> exportingOptions,
+			List<ExportingFormat> exportingFormats) {
+		return this.chooseFilePathForExportingQueryResult(null, exportingOptions, exportingFormats);
 	}
 	
 	

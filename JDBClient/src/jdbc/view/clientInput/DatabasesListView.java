@@ -1,4 +1,4 @@
-package jdbc.view;
+package jdbc.view.clientInput;
 
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
