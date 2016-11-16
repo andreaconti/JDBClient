@@ -30,7 +30,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
-import jdbc.view.HistoryFileDirectoryChooser;
+import jdbc.view.ClientDirectoryChooser;
 import jdbc.view.QueryError;
 import jdbc.view.UserDialog;
 import jdbc.view.events.AddRemoveDatabaseEvent;
@@ -176,7 +176,7 @@ public class ClientInput extends Stage {
 				
 				exportOnFile.setOnAction( ev -> {
 					UserDialog d = new UserDialog();
-					HistoryFileDirectoryChooser chooser;
+					ClientDirectoryChooser chooser;
 					if ( exportingPath.isPresent() )
 						chooser = d.chooseExportingDirectoryWithOptionsAndFormat(exportingPath.get(), optionsList, formatsList);
 					else

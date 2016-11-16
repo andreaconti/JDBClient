@@ -17,7 +17,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
-import jdbc.view.ExportQueryFileChooser;
+import jdbc.view.ClientDirectoryChooser;
 import jdbc.view.QueryResult;
 import jdbc.view.UserDialog;
 import jdbc.view.events.ExportQueryResultEvent;
@@ -84,17 +84,16 @@ public class ClientOutput extends Stage {
 		
 		exportQueryResult.setOnAction( ev -> {
 			UserDialog d = new UserDialog();
-			ExportQueryFileChooser chooser = d.chooseFilePathForExportingQueryResult(exportingPath, exportingOptions, exportingFormats);
+			ClientDirectoryChooser chooser = d.chooseExportingDirectoryWithOptionsAndFormat(exportingPath, exportingOptions, exportingFormats);
 			Optional<Path> result = chooser.getPathSelected();
-			// TODO !! ERROR NULLPOINTEREXCEPTION .ISAPPENDREQUESTED
 			if ( result.isPresent() ) {
-				System.out.println(chooser.isAppendRequested());
 				ExportQueryResultEvent toFire = new ExportQueryResultEvent(ExportQueryResultEvent.ANY,
 														results.get(tableChooser.getValue() - 1).getQueryResult(),
+														result.get(),
 														chooser.getExportingFormatSelected(),
-														chooser.getExportingOptionSelected(),
-														chooser.isAppendRequested());
+														chooser.getExportingOptionSelected());
 				this.fireEvent(toFire);
+				System.out.println(result.get());
 			}	
 		});
 		

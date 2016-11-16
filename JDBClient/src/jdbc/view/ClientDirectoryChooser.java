@@ -21,10 +21,10 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
-import jdbc.view.*;
 
-public class HistoryFileDirectoryChooser extends Dialog<Path> {
+public class ClientDirectoryChooser extends Dialog<Path> {
 	
+	protected TextField fileName;
 	protected TextField directoryChoosen;
 	protected Button browse;
 	protected ComboBox<ExportingOptions> options;
@@ -36,7 +36,7 @@ public class HistoryFileDirectoryChooser extends Dialog<Path> {
 	
 	protected VBox rootNode;
 
-	public HistoryFileDirectoryChooser(Path oldDirectory, List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats ) {
+	public ClientDirectoryChooser(Path oldDirectory, List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats ) {
 		
 		// checks
 		if ( exportingFormats == null || exportingOptions == null || exportingFormats.isEmpty() || exportingOptions.isEmpty() ) 
@@ -44,7 +44,7 @@ public class HistoryFileDirectoryChooser extends Dialog<Path> {
 		
 		rootNode = new VBox(10);
 		
-		// imposto directoryChoosed
+		// imposto directoryChoosen
 		directoryChoosen = new TextField();
 		directoryChoosen.setMinWidth(Screen.getMainScreen().getWidth() / 3);
 		directoryChoosen.setEditable(false);
@@ -52,6 +52,12 @@ public class HistoryFileDirectoryChooser extends Dialog<Path> {
 		if (oldDirectory != null)
 			directoryChoosen.setText(oldDirectory.toString());
 		HBox.setHgrow(directoryChoosen, Priority.ALWAYS);
+		
+		fileName = new TextField();
+		fileName.setPromptText("Enter the file name");
+		fileName.setMinWidth(Screen.getMainScreen().getWidth() / 3);
+		fileName.setMaxWidth(Screen.getMainScreen().getWidth() / 3);
+		HBox.setHgrow(fileName, Priority.ALWAYS);
 		
 		// imposto tasto browse
 		browse = new Button("Browse");
@@ -80,13 +86,15 @@ public class HistoryFileDirectoryChooser extends Dialog<Path> {
 		close = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 		ok = new ButtonType("Done", ButtonData.OK_DONE);
 		this.getDialogPane().getButtonTypes().addAll(ok, close);
-		rootNode.getChildren().addAll(browsingBar, options, format);
+		rootNode.getChildren().addAll(browsingBar, fileName,  options, format);
 		
 		this.getDialogPane().setContent(rootNode);
 		
 		this.setResultConverter( button -> {
-			if ( button == ok && result != null) 
+			if ( button == ok && result != null)  {
+				result = result.resolve(fileName.getText());
 				return result;
+			}
 			else 
 				return null;
 		});
@@ -95,12 +103,12 @@ public class HistoryFileDirectoryChooser extends Dialog<Path> {
 		enablerOk.setDisable(true);
 		
 		directoryChoosen.textProperty().addListener( (obs, oldV, newV) -> {
-			enablerOk.setDisable(directoryChoosen.getText().trim().isEmpty());
+			enablerOk.setDisable(directoryChoosen.getText().trim().isEmpty() && fileName.getText().trim().isEmpty());
 		});
 		
 	}
 	
-	public HistoryFileDirectoryChooser( List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats) {
+	public ClientDirectoryChooser( List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats) {
 		this( Paths.get(""), exportingOptions, exportingFormats );
 	}
 	

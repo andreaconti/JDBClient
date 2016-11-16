@@ -195,31 +195,18 @@ public class UserDialog {
 	}
 	
 	
-	public HistoryFileDirectoryChooser chooseExportingDirectoryWithOptionsAndFormat(Path oldDirectory, 
+	public ClientDirectoryChooser chooseExportingDirectoryWithOptionsAndFormat(Path oldDirectory, 
 											List<ExportingOptions> exportingOptions,
 											List<ExportingFormat> exportingFormats) {
-		HistoryFileDirectoryChooser chooser = new HistoryFileDirectoryChooser(oldDirectory, exportingOptions, exportingFormats);
+		ClientDirectoryChooser chooser = new ClientDirectoryChooser(oldDirectory, exportingOptions, exportingFormats);
 		chooser.showAndWait();
 		return chooser;
 		
 	}
 	
-	public HistoryFileDirectoryChooser chooseExportingDirectoryWithOptionsAndFormat( List<ExportingOptions> exportingOptions,
+	public ClientDirectoryChooser chooseExportingDirectoryWithOptionsAndFormat( List<ExportingOptions> exportingOptions,
 											List<ExportingFormat> exportingFormats) {
 		return this.chooseExportingDirectoryWithOptionsAndFormat(Paths.get(System.getProperty("user.home")), exportingOptions, exportingFormats);
-	}
-	
-	public ExportQueryFileChooser chooseFilePathForExportingQueryResult(Path oldFilePath, 
-												List<ExportingOptions> exportingOptions,
-												List<ExportingFormat> exportingFormats) {
-		ExportQueryFileChooser chooser = new ExportQueryFileChooser(oldFilePath, exportingOptions, exportingFormats);
-		chooser.showAndWait();
-		return chooser;
-	}
-	
-	public ExportQueryFileChooser chooseFilePathForExportingQueryResult(List<ExportingOptions> exportingOptions,
-			List<ExportingFormat> exportingFormats) {
-		return this.chooseFilePathForExportingQueryResult(null, exportingOptions, exportingFormats);
 	}
 	
 	
