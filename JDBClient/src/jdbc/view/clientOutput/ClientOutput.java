@@ -86,9 +86,11 @@ public class ClientOutput extends Stage {
 			UserDialog d = new UserDialog();
 			ExportQueryFileChooser chooser = d.chooseFilePathForExportingQueryResult(exportingPath, exportingOptions, exportingFormats);
 			Optional<Path> result = chooser.getPathSelected();
+			// TODO !! ERROR NULLPOINTEREXCEPTION .ISAPPENDREQUESTED
 			if ( result.isPresent() ) {
+				System.out.println(chooser.isAppendRequested());
 				ExportQueryResultEvent toFire = new ExportQueryResultEvent(ExportQueryResultEvent.ANY,
-														results.get(tableChooser.getValue()).getQueryResult(),
+														results.get(tableChooser.getValue() - 1).getQueryResult(),
 														chooser.getExportingFormatSelected(),
 														chooser.getExportingOptionSelected(),
 														chooser.isAppendRequested());

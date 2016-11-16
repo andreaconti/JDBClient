@@ -1,5 +1,6 @@
 package jdbc.view;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import javafx.event.EventHandler;
 import javafx.event.EventType;
 
 import javafx.stage.Screen;
+import javafx.util.Pair;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
 import jdbc.view.clientInput.ClientInput;
@@ -24,24 +26,32 @@ public class ClientUIController {
 	private List<ExportingOptions> exportingOptions;
 	private List<ExportingFormat> exportingFormats;
 	
+	private List<Pair<EventHandler<? super SendQueryEvent>, EventType<? extends SendQueryEvent>>> eventHandlers = new ArrayList<>();
+	
 	/* COSTRUTTORI */
 	public ClientUIController(String username, ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
 		mainView = new ClientInput(username, databases, optionsList, formatsList, width, height);
 		mainView.setOptionsList(Arrays.asList(ExportingOptions.values()));
-		this.exportingFormats = exportingFormats;
-		this.exportingOptions = exportingOptions;
+		this.exportingFormats = formatsList;
+		this.exportingOptions = optionsList;
 	}
 	
 	public ClientUIController(String username, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
 		mainView = new ClientInput(username, optionsList, formatsList,  width, height);
+		this.exportingFormats = formatsList;
+		this.exportingOptions = optionsList;
 	}
 	
 	public ClientUIController(ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
 		mainView = new ClientInput(databases, optionsList, formatsList, width, height);
+		this.exportingFormats = formatsList;
+		this.exportingOptions = optionsList;
 	}
 	
 	public ClientUIController(List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
 		mainView = new ClientInput(optionsList, formatsList, width, height);
+		this.exportingFormats = formatsList;
+		this.exportingOptions = optionsList;
 	}
 	
 	/* TUTTI I GETTERS E SETTER */
@@ -104,6 +114,9 @@ public class ClientUIController {
 		double width = Screen.getPrimary().getVisualBounds().getWidth() / 3;
 		double height = Screen.getPrimary().getVisualBounds().getWidth() / 4;
 		ClientOutput out = new ClientOutput(results, exportingOptions, exportingFormats, width, height);
+		eventHandlers.forEach( handler -> {
+			out.addEventHandler( handler.getValue(), handler.getKey() );
+		});
 		out.show();
 	}
 	
@@ -122,7 +135,7 @@ public class ClientUIController {
 		mainView.addHistoryFileEventHandler(type, handler);
 	}
 	public void addExportQueryResultEventHandler(EventType<SendQueryEvent> type, EventHandler<SendQueryEvent> handler) {
-		// TODO
+		this.eventHandlers.add(new Pair<>(handler, type));
 	}
 	
 	public void removeAddRemoveDatabaseEventHandler(EventType<AddRemoveDatabaseEvent> type, EventHandler<AddRemoveDatabaseEvent> handler) {
@@ -138,7 +151,7 @@ public class ClientUIController {
 		mainView.removeHistoryFileEventHandler(type, handler);
 	}
 	public void removeExportQueryResultEventHandler(EventType<SendQueryEvent> type, EventHandler<SendQueryEvent> handler) {
-		// TODO
+		this.eventHandlers.remove(new Pair<>(handler, type));
 	}
 
 }
