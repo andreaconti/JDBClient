@@ -18,6 +18,7 @@ import jdbc.view.events.*;
 import jdbc.view.events.ConnectionEvent;
 import jdbc.view.events.HistoryFileEvent;
 
+/* ClientUIController */
 public class ClientUIController {
 	
 	private ClientInput mainView;
