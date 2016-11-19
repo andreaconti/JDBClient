@@ -1,10 +1,11 @@
-package jdbc.view.clientOutput;
+package jdbc.view;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jdbc.view.css.CSSStyleable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -17,12 +18,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
-import jdbc.view.ClientDirectoryChooser;
-import jdbc.view.QueryResult;
-import jdbc.view.UserDialog;
 import jdbc.view.events.ExportQueryResultEvent;
 
-public class ClientOutput extends Stage {
+class ClientOutput extends Stage implements CSSStyleable {
 	
 	// core values
 	private List<QueryResultView> results;
@@ -34,9 +32,10 @@ public class ClientOutput extends Stage {
 	Path exportingPath;
 	List<ExportingOptions> exportingOptions;
 	List<ExportingFormat> exportingFormats;
+	private UserDialog dialog;
 
 	public ClientOutput(List<QueryResult> results, List<ExportingOptions> exportingOptions,
-				List<ExportingFormat> exportingFormats, double width, double height) {
+				List<ExportingFormat> exportingFormats, UserDialog dialog, double width, double height) {
 		
 		// checks
 		if ( results == null || results.isEmpty())
@@ -45,9 +44,14 @@ public class ClientOutput extends Stage {
 		if ( exportingFormats == null || exportingOptions == null )
 			throw new NullPointerException("(exportingFormats || exportingOptions) == null");
 		
+		if (dialog == null)
+			throw new NullPointerException("UserDialog == null");
+		
 		this.exportingOptions = exportingOptions;
 		this.exportingFormats = exportingFormats;
 		this.results = results.stream().map(queryResult -> new QueryResultView(queryResult)).collect(Collectors.toList());
+		
+		this.dialog = dialog;
 		
 		BorderPane rootNode = new BorderPane();
 		rootNode.setPadding(new Insets(10,10,10,10));
@@ -73,6 +77,31 @@ public class ClientOutput extends Stage {
 		rootNode.setTop(initMainMenu());
 	}
 	
+
+	@Override
+	public void setCSSStyle(List<String> cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addCSSStyle(String cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void resetCSSStyle() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeCSSStyle(String cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	private MenuBar initMainMenu() {
 		
 		MenuBar mainMenu = new MenuBar();
@@ -83,8 +112,7 @@ public class ClientOutput extends Stage {
 		exportOption.getItems().add(exportQueryResult);
 		
 		exportQueryResult.setOnAction( ev -> {
-			UserDialog d = new UserDialog();
-			ClientDirectoryChooser chooser = d.chooseExportingDirectoryWithOptionsAndFormat(exportingPath, exportingOptions, exportingFormats);
+			ClientDirectoryChooser chooser = dialog.chooseExportingDirectoryWithOptionsAndFormat(exportingPath, exportingOptions, exportingFormats);
 			Optional<Path> result = chooser.getPathSelected();
 			if ( result.isPresent() ) {
 				ExportQueryResultEvent toFire = new ExportQueryResultEvent(ExportQueryResultEvent.ANY,

@@ -1,4 +1,4 @@
-package jdbc.view.clientInput;
+package jdbc.view;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -30,15 +30,13 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
-import jdbc.view.ClientDirectoryChooser;
-import jdbc.view.QueryError;
-import jdbc.view.UserDialog;
+import jdbc.view.css.CSSStyleable;
 import jdbc.view.events.AddRemoveDatabaseEvent;
 import jdbc.view.events.ConnectionEvent;
 import jdbc.view.events.HistoryFileEvent;
 import jdbc.view.events.SendQueryEvent;
 
-public class ClientInput extends Stage {
+class ClientInput extends Stage implements CSSStyleable {
 	
 	// root node
 	private VBox rootNode;
@@ -68,17 +66,21 @@ public class ClientInput extends Stage {
 	private List<ExportingOptions> optionsList;
 	private List<ExportingFormat> formatsList;
 	
+	// dialogs
+	private UserDialog dialog;
+	
 	// styling
 	private String cssPath;
 
 	/* COSTRUTTORI */
-
 	
-	public ClientInput(String username, ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, double width, double height) {
+	public ClientInput(String username, ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, UserDialog dialog, double width, double height) {
 		
-		validate("username or databases list is null", username, databases );
+		validate("username or databases list is null", username, databases, dialog);
 		if ( width < 0 || height < 0 )
 			throw new IllegalArgumentException("width < 0  || height < 0");
+		
+		this.dialog = dialog;
 		
 		// imposto root..
 		rootNode = new VBox(10);
@@ -105,16 +107,16 @@ public class ClientInput extends Stage {
 		rootNode.getChildren().addAll(setMainMenu(),HighToolbar, query, errorsTable, sendQuery);
 	}
 	
-	public ClientInput(ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, double width, double height) {
-		this("", databases, optionsList, formatsList, width, height);
+	public ClientInput(ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, UserDialog dialog, double width, double height) {
+		this("", databases, optionsList, formatsList, dialog, width, height);
 	}
 	
-	public ClientInput(String username,List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, double width, double height) {
-		this(username, FXCollections.observableArrayList(), optionsList, formatsList, width, height);
+	public ClientInput(String username,List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, UserDialog dialog, double width, double height) {
+		this(username, FXCollections.observableArrayList(), optionsList, formatsList, dialog, width, height);
 	}
 	
-	public ClientInput(List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, double width, double height) {
-		this("", FXCollections.observableArrayList(), optionsList, formatsList, width, height);
+	public ClientInput(List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, UserDialog dialog, double width, double height) {
+		this("", FXCollections.observableArrayList(), optionsList, formatsList, dialog, width, height);
 	}
 	
 	// listeners
@@ -146,8 +148,6 @@ public class ClientInput extends Stage {
 				
 				DatabasesListView list = new DatabasesListView(this.databasePath.getItems());
 				list.setOnActionAddButton( ev1 -> {
-					UserDialog dialog;
-					if (cssPath != null) dialog = new UserDialog(cssPath); else dialog = new UserDialog();
 					Optional<String> string = dialog.askForString("Archive Database", "Write here the complete path of the database..");
 					if (string.isPresent()) {
 						this.databaseToAddOrDelete = string;
@@ -169,18 +169,19 @@ public class ClientInput extends Stage {
 				list.show();
 			});
 			
+			/* TODO */
+			
 			Menu exporting = new Menu("Exporting Options");
 			{
 				MenuItem exportOnFile = new MenuItem("Save Query on a file");
 				exporting.getItems().add(exportOnFile);
 				
 				exportOnFile.setOnAction( ev -> {
-					UserDialog d = new UserDialog();
 					ClientDirectoryChooser chooser;
 					if ( exportingPath.isPresent() )
-						chooser = d.chooseExportingDirectoryWithOptionsAndFormat(exportingPath.get(), optionsList, formatsList);
+						chooser = dialog.chooseExportingDirectoryWithOptionsAndFormat(exportingPath.get(), optionsList, formatsList);
 					else
-						chooser = d.chooseExportingDirectoryWithOptionsAndFormat(optionsList, formatsList);
+						chooser = dialog.chooseExportingDirectoryWithOptionsAndFormat(optionsList, formatsList);
 					
 					Optional<Path> path = chooser.getPathSelected();
 					if ( path.isPresent() ) {
@@ -343,6 +344,32 @@ public class ClientInput extends Stage {
 			return databaseToAddOrDelete;
 	}
 	
+	/* METODI DELLE INTERFACCE */
+	
+	@Override
+	public void setCSSStyle(List<String> cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addCSSStyle(String cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void resetCSSStyle() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeCSSStyle(String cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	/* METODI PRIVATI PER LEGGIBILITA' E UTILITA' */
 	
 	private void initQueryArea() {
@@ -421,6 +448,5 @@ public class ClientInput extends Stage {
 				throw new NullPointerException(descError);
 		
 	}
-	
 	
 }

@@ -20,21 +20,15 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
+import jdbc.view.css.CSSStyleable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 
-public class UserDialog {
+public class UserDialog implements CSSStyleable {
 	
 	private String cssPath;
 	
-	public UserDialog() { }
 	
-	public UserDialog(String cssPath) {
-		
-		validateObjects(cssPath);
-		
-		this.cssPath = cssPath;
-	}
 	
 	public void showInformation(String info) {
 		
@@ -42,9 +36,7 @@ public class UserDialog {
 		
 		Alert infoAlert = new Alert(AlertType.INFORMATION);
 
-		if (cssPath != null) {
-			infoAlert.getDialogPane().getStylesheets().add(cssPath);
-		}
+		applyStyle(infoAlert);
 		
 		infoAlert.setTitle("Information");
 		infoAlert.setHeaderText(info);
@@ -57,9 +49,7 @@ public class UserDialog {
 		
 		Alert infoAlert = new Alert(AlertType.ERROR);
 		
-		if (cssPath != null) {
-			infoAlert.getDialogPane().getStylesheets().add(cssPath);
-		}
+		applyStyle(infoAlert);
 		
 		infoAlert.setTitle("Error");
 		infoAlert.setHeaderText(error);
@@ -73,8 +63,7 @@ public class UserDialog {
 		Dialog<String> d = new Dialog<>();
 		d.setTitle(title);
 		
-		if ( cssPath != null )
-			d.getDialogPane().getStylesheets().add(cssPath);
+		applyStyle(d);
 		
 		{
 			ButtonType ok = new ButtonType("ok", ButtonData.OK_DONE);
@@ -111,8 +100,7 @@ public class UserDialog {
 		Dialog<Boolean> d = new Dialog<>();
 		d.setTitle("Enter The Project Title");
 		
-		if ( cssPath != null )
-			d.getDialogPane().getStylesheets().add(cssPath);
+		applyStyle(d);
 		
 		{
 			ButtonType ok = new ButtonType("Yes", ButtonData.OK_DONE);
@@ -199,6 +187,7 @@ public class UserDialog {
 											List<ExportingOptions> exportingOptions,
 											List<ExportingFormat> exportingFormats) {
 		ClientDirectoryChooser chooser = new ClientDirectoryChooser(oldDirectory, exportingOptions, exportingFormats);
+		applyStyle(chooser);
 		chooser.showAndWait();
 		return chooser;
 		
@@ -215,6 +204,36 @@ public class UserDialog {
 		for ( Object ob : objects )
 			if ( ob == null )
 				throw new NullPointerException();
+		
+	}
+	
+	private void applyStyle(Dialog<?> d) {
+		if (this.cssPath != null) {
+			d.getDialogPane().getStylesheets().add(this.cssPath);
+		}
+	}
+
+	@Override
+	public void setCSSStyle(List<String> cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addCSSStyle(String cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void resetCSSStyle() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeCSSStyle(String cssPath) {
+		// TODO Auto-generated method stub
 		
 	}
 

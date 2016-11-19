@@ -22,7 +22,7 @@ import javafx.scene.layout.VBox;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
 
-public class ClientDirectoryChooser extends Dialog<Path> {
+class ClientDirectoryChooser extends Dialog<Path> {
 	
 	protected TextField fileName;
 	protected TextField directoryChoosen;
