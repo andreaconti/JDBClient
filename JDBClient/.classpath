@@ -2,12 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/v9.7fp1_jdbc_sqlj.tar"/>
-	<classpathentry kind="lib" path="lib/richtextfx-0.7-M2-javadoc.jar"/>
-	<classpathentry kind="lib" path="lib/richtextfx-0.7-M2.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/JDBClient/lib/richtextfx-0.7-M2-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/Pacho/Google Drive/db2_db2driver_for_jdbc_sqlj_v11.1/db2jcc4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
