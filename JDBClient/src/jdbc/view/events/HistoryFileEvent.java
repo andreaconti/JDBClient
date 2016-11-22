@@ -13,15 +13,16 @@ public class HistoryFileEvent extends ClientEvent {
 	
 	private ExportingOptions exportingOptions;
 	private ExportingFormat exportingFormats;
-	private Path exportingPath;
+	private Path exportingDirectory;
+	private String fileName;
 	
 	
 	public HistoryFileEvent(EventType<? extends HistoryFileEvent> eventType, ExportingOptions exportingOptions,
-			ExportingFormat exportingFormats, Path exportingPath) {
+			ExportingFormat exportingFormats, Path exportingDirectory, String fileName) {
 		super(eventType);
 		this.exportingOptions = exportingOptions;
 		this.exportingFormats = exportingFormats;
-		this.exportingPath = exportingPath;
+		this.exportingDirectory = exportingDirectory;
 	}
 
 	public ExportingOptions getExportingOptions() {
@@ -34,8 +35,12 @@ public class HistoryFileEvent extends ClientEvent {
 	}
 
 
-	public Path getDatabasePath() {
-		return exportingPath;
+	public Path getExportingDirectory() {
+		return exportingDirectory;
+	}
+	
+	public String getFileName() {
+		return this.fileName;
 	}
 
 }

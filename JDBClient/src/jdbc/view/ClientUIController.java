@@ -180,6 +180,13 @@ public class ClientUIController {
 		mainView.resetPassword();
 	}
 	
+	/**
+	 * @return a UserDialog instance truly setted 
+	 */
+	public UserDialog getUserDialog() {
+		return this.dialog;
+	}
+	
 	public ObservableList<String> getDatabasesPaths() {
 		return mainView.getDatabasesShowed();
 	}

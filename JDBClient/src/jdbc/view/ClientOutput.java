@@ -113,15 +113,15 @@ class ClientOutput extends Stage implements CSSStyleable {
 		
 		exportQueryResult.setOnAction( ev -> {
 			ClientDirectoryChooser chooser = dialog.chooseExportingDirectoryWithOptionsAndFormat(exportingPath, exportingOptions, exportingFormats);
-			Optional<Path> result = chooser.getPathSelected();
-			if ( result.isPresent() ) {
+			Optional<Path> directory = chooser.getDirectorySelected();
+			if ( directory.isPresent() ) {
 				ExportQueryResultEvent toFire = new ExportQueryResultEvent(ExportQueryResultEvent.ANY,
 														results.get(tableChooser.getValue() - 1).getQueryResult(),
-														result.get(),
+														directory.get(),
+														chooser.getFileName(),
 														chooser.getExportingFormatSelected(),
 														chooser.getExportingOptionSelected());
 				this.fireEvent(toFire);
-				System.out.println(result.get());
 			}	
 		});
 		

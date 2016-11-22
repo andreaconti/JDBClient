@@ -183,7 +183,7 @@ class ClientInput extends Stage implements CSSStyleable {
 					else
 						chooser = dialog.chooseExportingDirectoryWithOptionsAndFormat(optionsList, formatsList);
 					
-					Optional<Path> path = chooser.getPathSelected();
+					Optional<Path> path = chooser.getDirectorySelected();
 					if ( path.isPresent() ) {
 						this.exportingPath = Optional.of(path.get());
 						this.exportingOptions = Optional.ofNullable(chooser.getExportingOptionSelected());
@@ -191,7 +191,8 @@ class ClientInput extends Stage implements CSSStyleable {
 						HistoryFileEvent toFire = new HistoryFileEvent(HistoryFileEvent.ANY, 
 																		exportingOptions.get(), 
 																		exportingFormat.get(), 
-																		exportingPath.get() );
+																		exportingPath.get(),
+																		chooser.getFileName());
 						this.fireEvent(toFire);
 					}
 				});

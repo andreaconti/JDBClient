@@ -91,10 +91,8 @@ class ClientDirectoryChooser extends Dialog<Path> {
 		this.getDialogPane().setContent(rootNode);
 		
 		this.setResultConverter( button -> {
-			if ( button == ok && result != null)  {
-				result = result.resolve(fileName.getText());
-				return result;
-			}
+			if ( button == ok && result != null)
+				return result.resolve(fileName.getText());
 			else 
 				return null;
 		});
@@ -120,8 +118,12 @@ class ClientDirectoryChooser extends Dialog<Path> {
 		return format.getSelectionModel().getSelectedItem();
 	}
 	
-	public Optional<Path> getPathSelected() {
+	public Optional<Path> getDirectorySelected() {
 		return Optional.ofNullable(result);
+	}
+	
+	public String getFileName() {
+		return this.fileName.getText();
 	}
 
 

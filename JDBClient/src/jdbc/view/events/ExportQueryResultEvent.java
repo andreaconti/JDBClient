@@ -14,13 +14,15 @@ public class ExportQueryResultEvent extends ClientEvent {
 	public static final EventType<? extends ClientEvent> ANY = new EventType<>(ClientEvent.ANY, "All ExportQueryResultEvents");
 	
 	private QueryResult queryResult;
-	private Path filePath;
+	private Path directoryPath;
+	private String fileName;
 	private ExportingFormat exportingFormat;
 	private ExportingOptions exportingOptions;
 	
-	public ExportQueryResultEvent(EventType<? extends Event> eventType, QueryResult queryResult, Path filePath, ExportingFormat exportingFormat, ExportingOptions exportingOptions) {
+	public ExportQueryResultEvent(EventType<? extends Event> eventType, QueryResult queryResult, Path filePath, String fileName, ExportingFormat exportingFormat, ExportingOptions exportingOptions) {
 		super(eventType);
-		this.filePath = filePath;
+		this.directoryPath = filePath;
+		this.fileName = fileName;
 		this.queryResult = queryResult;
 		this.exportingFormat = exportingFormat;
 		this.exportingOptions = exportingOptions;
@@ -38,8 +40,12 @@ public class ExportQueryResultEvent extends ClientEvent {
 		return exportingOptions;
 	}
 
-	public Path getFilePath() {
-		return filePath;
+	public Path getDirectoryPath() {
+		return directoryPath;
+	}
+	
+	public String getFileName() {
+		return this.fileName;
 	}
 
 }
