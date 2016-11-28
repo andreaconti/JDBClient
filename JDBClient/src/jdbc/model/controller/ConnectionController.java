@@ -1,4 +1,4 @@
-package jdbc.controller;
+package jdbc.model.controller;
 
 
 import jdbc.model.Table;

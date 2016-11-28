@@ -1,4 +1,4 @@
-package jdbc.controller;
+package jdbc.model.controller;
 
 import java.sql.SQLException;
 import java.sql.SQLWarning;

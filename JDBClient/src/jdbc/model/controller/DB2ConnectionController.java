@@ -1,4 +1,4 @@
-package jdbc.controller;
+package jdbc.model.controller;
 
 
 import java.sql.Connection;
@@ -56,7 +56,7 @@ public class DB2ConnectionController implements ConnectionController {
 	 * Disconnects from the database
 	 * @exception db2client.connection.DB2Exception
 	 * DB2Exception
-	 */
+	 */ 
 			if(!(connection == null)) {	
 				checkConnectionWarnings(connection);
 				connection.close();

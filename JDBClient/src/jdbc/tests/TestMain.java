@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -17,13 +16,13 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import jdbc.controller.ConnectionController;
-import jdbc.controller.DB2ConnectionController;
-import jdbc.controller.ErrorHandler;
-import jdbc.controller.CommandLineErrorHandler;
-import jdbc.controller.WarningDetectedEvent;
-import jdbc.controller.WarningDetectedListener;
 import jdbc.model.Table;
+import jdbc.model.controller.CommandLineErrorHandler;
+import jdbc.model.controller.ConnectionController;
+import jdbc.model.controller.DB2ConnectionController;
+import jdbc.model.controller.ErrorHandler;
+import jdbc.model.controller.WarningDetectedEvent;
+import jdbc.model.controller.WarningDetectedListener;
 
 public class TestMain implements ActionListener, WarningDetectedListener {
 	
@@ -84,7 +83,7 @@ public class TestMain implements ActionListener, WarningDetectedListener {
 		try {
 			controller.connectTo(urlField.getText(), userField.getText(), new String(passwordField.getPassword()));
 			
-			String singleLineQuery = "SELECT * FROM MODELLI";
+			String singleLineQuery = "SELECT * FROM AUTO\n";
 			Table table = controller.executeQuery(singleLineQuery);
 			textArea.append(table.toString());
 			controller.disconnect();
