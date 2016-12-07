@@ -18,6 +18,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
 import jdbc.view.css.CSSStyleable;
@@ -139,6 +140,42 @@ class UserDialogImpl implements CSSStyleable, UserDialog {
 		
 		return d.showAndWait().get();
 
+	}
+	
+	@Override
+	public Optional<File> showOpenFile(String title, File initialDirectory, Window owner) {
+		
+		validateObjects(title, initialDirectory);
+		
+		FileChooser f = new FileChooser();
+		f.setTitle(title);
+		f.setInitialDirectory(initialDirectory);
+		File result = f.showOpenDialog(owner);
+		
+		if ( result == null )
+			return Optional.empty();
+		else
+			return Optional.of(result);
+	}
+	
+	@Override
+	public Optional<File> showOpenFile(String title, File initialDirectory) {
+		return showOpenFile(title, initialDirectory, null);
+	}
+	
+	@Override
+	public Optional<File> showOpenFile(String title) {
+		return showOpenFile(title, Paths.get(System.getProperty("user.home")).toFile(), null);
+	}
+	
+	@Override
+	public Optional<File> showOpenFile(File initialDirectory) {
+		return showOpenFile("", initialDirectory, null);
+	}
+	
+	@Override
+	public Optional<File> showOpenFile() {
+		return showOpenFile("", Paths.get(System.getProperty("user.home")).toFile(), null);
 	}
 	
 	//TODO versione in cui si specifica anche il controller della UI

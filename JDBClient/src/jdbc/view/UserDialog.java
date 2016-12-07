@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
+import javafx.stage.Window;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
 
@@ -48,5 +49,15 @@ public interface UserDialog {
 	void resetCSSStyle();
 
 	void removeCSSStyle(String cssPath);
+
+	Optional<File> showOpenFile(String title, File initialDirectory, Window owner);
+
+	Optional<File> showOpenFile(String title, File initialDirectory);
+
+	Optional<File> showOpenFile(String title);
+
+	Optional<File> showOpenFile(File initialDirectory);
+
+	Optional<File> showOpenFile();
 
 }

@@ -11,16 +11,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-class DatabasesListView extends ResizableStage {
+class ValuesListView extends ResizableStage {
 	
 	private Button delete;
 	private Button add;
-	private ListView<String> dbView;
+	private ListView<? extends Object> valuesView;
 
-	public DatabasesListView(ObservableList<String> databases) {
+	public ValuesListView(ObservableList<? extends Object> values) {
 		
-		dbView = new ListView<>(databases);
-		VBox.setVgrow(dbView, Priority.ALWAYS);
+		valuesView = new ListView<>(values);
+		VBox.setVgrow(valuesView, Priority.ALWAYS);
 		
 		VBox rootNode = new VBox(10);
 		rootNode.setPadding(new Insets(10,10,10,10));
@@ -36,7 +36,7 @@ class DatabasesListView extends ResizableStage {
 		HBox bar = new HBox(10);
 		bar.getChildren().addAll(delete, add);
 		
-		rootNode.getChildren().addAll(dbView, bar);
+		rootNode.getChildren().addAll(valuesView, bar);
 		
 		super.close.setOnAction( ev -> this.close() );
 		super.setAllScreenButtonVisible(false);
@@ -52,8 +52,8 @@ class DatabasesListView extends ResizableStage {
 		this.delete.setOnAction(handler);
 	}
 	
-	public ListView<String> getListView() {
-		return this.dbView;
+	public ListView<? extends Object> getListView() {
+		return this.valuesView;
 	}
 
 }

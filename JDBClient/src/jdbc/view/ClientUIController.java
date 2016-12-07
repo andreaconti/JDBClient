@@ -1,8 +1,11 @@
 package jdbc.view;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -41,7 +44,8 @@ public class ClientUIController {
 	private StyleProducer styleProducer;
 	private UserDialogImpl dialog;
 	
-	private List<Pair<EventHandler<? super SendQueryEvent>, EventType<? extends SendQueryEvent>>> eventHandlers = new ArrayList<>();
+	private List<Pair<EventHandler<? super SendQueryEvent>, EventType<? extends SendQueryEvent>>> sendQueryEventHandlers = new ArrayList<>();
+	private List<Pair<EventHandler<DriversEvent>, EventType<DriversEvent>>> driversEventHandlers = new ArrayList<>();
 	
 	/**
 	 * 
@@ -256,13 +260,33 @@ public class ClientUIController {
 		double width = Screen.getPrimary().getVisualBounds().getWidth() / 3;
 		double height = Screen.getPrimary().getVisualBounds().getWidth() / 4;
 		ClientOutput out = new ClientOutput(results, exportingOptions, exportingFormats, dialog, width, height);
-		eventHandlers.forEach( handler -> {
+		sendQueryEventHandlers.forEach( handler -> {
 			out.addEventHandler( handler.getValue(), handler.getKey() );
 		});
 		
 		if (styleProducer != null) styleProducer.setStyleOf(out);
 		
 		out.show();
+	}
+	
+	/**
+	 * this method shows to the user a window where he can see all drivers and manage them
+	 * @param drivers list of all drivers to show to the user
+	 */
+	public void showDrivers(ObservableList<Path> drivers) {
+		ValuesListView list = new ValuesListView(drivers);
+		
+		this.driversEventHandlers.forEach( handler  -> list.addEventHandler(handler.getValue(), handler.getKey()) );
+		
+		list.setOnActionAddButton( ev -> {
+			Optional<File> result = dialog.showOpenFile("Chooser the driver");
+			if ( result.isPresent() )
+				list.fireEvent(new DriversEvent(DriversEvent.ADD_DRIVER_REQUEST, result.get().toPath()));
+		});
+		list.setOnActionDeleteButton( ev ->
+			list.fireEvent( new DriversEvent(DriversEvent.REMOVE_DRIVER_REQUEST, (Path) list.getListView().getSelectionModel().getSelectedItem()) ) );
+		
+		list.show();
 	}
 	
 	/**
@@ -351,7 +375,7 @@ public class ClientUIController {
 	 * @param handler the EventHandler that is called
 	 */
 	public void addExportQueryResultEventHandler(EventType<SendQueryEvent> type, EventHandler<SendQueryEvent> handler) {
-		this.eventHandlers.add(new Pair<>(handler, type));
+		this.sendQueryEventHandlers.add(new Pair<>(handler, type));
 	}
 	
 	/**
@@ -361,6 +385,17 @@ public class ClientUIController {
 	 */
 	public void addSystemEventHandler(EventType<SystemEvent> type, EventHandler<SystemEvent> handler) {
 		this.mainView.addSystemEventHandler(type, handler);
+	}
+	
+	public void addDriversEventHandler(EventType<DriversEvent> type, EventHandler<DriversEvent> handler) {
+		if (type.equals(DriversEvent.ALL_DRIVER_EVENTS)) {
+			this.mainView.addEventHandler(type, handler);
+			this.driversEventHandlers.add(new Pair<>(handler, type));
+		}
+		else if ( type.equals(DriversEvent.SHOW_DRIVER_REQUEST) ) 
+			this.mainView.addEventHandler(type, handler);
+		else
+			this.driversEventHandlers.add(new Pair<>(handler, type));
 	}
 	
 	/**
@@ -405,7 +440,7 @@ public class ClientUIController {
 	 * @param handler the EventHandler that is called
 	 */
 	public void removeExportQueryResultEventHandler(EventType<SendQueryEvent> type, EventHandler<SendQueryEvent> handler) {
-		this.eventHandlers.remove(new Pair<>(handler, type));
+		this.sendQueryEventHandlers.remove(new Pair<>(handler, type));
 	}
 	
 	/**

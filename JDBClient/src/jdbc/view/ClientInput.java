@@ -32,6 +32,7 @@ import jdbc.exporter.ExportingOptions;
 import jdbc.view.css.CSSStyleable;
 import jdbc.view.events.AddRemoveDatabaseEvent;
 import jdbc.view.events.ConnectionEvent;
+import jdbc.view.events.DriversEvent;
 import jdbc.view.events.HistoryFileEvent;
 import jdbc.view.events.SendQueryEvent;
 import jdbc.view.events.SystemEvent;
@@ -147,34 +148,40 @@ class ClientInput extends ResizableStage implements CSSStyleable {
 		
 		{
 			Menu databases = new Menu("Database Management");
-			MenuItem removeAdd = new MenuItem("Remove / Add Databases");
-			databases.getItems().add(removeAdd);
-			
-			removeAdd.setOnAction(ev -> {
-				
-				DatabasesListView list = new DatabasesListView(this.databasePath.getItems());
-				list.setOnActionAddButton( ev1 -> {
-					Optional<String> string = dialog.askForString("Archive Database", "Write here the complete path of the database..");
-					if (string.isPresent()) {
-						this.databaseToAddOrDelete = string;
-						AddRemoveDatabaseEvent toFire = new AddRemoveDatabaseEvent(AddRemoveDatabaseEvent.ADD_DATABASE_REQUEST, this.getDatabaseToAddOrDelete().get());
-						this.fireEvent(toFire);
-					}
+			{
+				MenuItem removeAdd = new MenuItem("Remove / Add Databases");
+				databases.getItems().add(removeAdd);
+				removeAdd.setOnAction(ev -> {
+
+					ValuesListView list = new ValuesListView(this.databasePath.getItems());
+					list.setOnActionAddButton( ev1 -> {
+						Optional<String> string = dialog.askForString("Archive Database", "Write here the complete path of the database..");
+						if (string.isPresent()) {
+							this.databaseToAddOrDelete = string;
+							AddRemoveDatabaseEvent toFire = new AddRemoveDatabaseEvent(AddRemoveDatabaseEvent.ADD_DATABASE_REQUEST, this.getDatabaseToAddOrDelete().get());
+							this.fireEvent(toFire);
+						}
+					});
+
+					list.setOnActionDeleteButton( ev2 -> {
+						String toDelete = (String) list.getListView().getSelectionModel().getSelectedItem();
+						if ( toDelete != null ) {
+							System.out.println(toDelete);
+							this.databaseToAddOrDelete = Optional.of(toDelete);
+							AddRemoveDatabaseEvent toFire = new AddRemoveDatabaseEvent(AddRemoveDatabaseEvent.REMOVE_DATABASE_REQUEST, this.getDatabaseToAddOrDelete().get());
+							this.fireEvent(toFire);
+						}
+					});
+
+					list.show();
 				});
 				
-				list.setOnActionDeleteButton( ev2 -> {
-					String toDelete = list.getListView().getSelectionModel().getSelectedItem();
-					if ( toDelete != null ) {
-						System.out.println(toDelete);
-						this.databaseToAddOrDelete = Optional.of(toDelete);
-						AddRemoveDatabaseEvent toFire = new AddRemoveDatabaseEvent(AddRemoveDatabaseEvent.REMOVE_DATABASE_REQUEST, this.getDatabaseToAddOrDelete().get());
-						this.fireEvent(toFire);
-					}
-				});
+				MenuItem manageDrivers = new MenuItem("Drivers");
+				databases.getItems().add(manageDrivers);
+				manageDrivers.setOnAction( ev -> this.fireEvent(new DriversEvent(DriversEvent.SHOW_DRIVER_REQUEST)));
 				
-				list.show();
-			});
-			
+			}
+
 			/* TODO */
 			
 			Menu exporting = new Menu("Exporting Options");
