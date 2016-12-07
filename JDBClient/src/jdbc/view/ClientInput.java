@@ -27,7 +27,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
 import jdbc.view.css.CSSStyleable;
@@ -35,8 +34,9 @@ import jdbc.view.events.AddRemoveDatabaseEvent;
 import jdbc.view.events.ConnectionEvent;
 import jdbc.view.events.HistoryFileEvent;
 import jdbc.view.events.SendQueryEvent;
+import jdbc.view.events.SystemEvent;
 
-class ClientInput extends Stage implements CSSStyleable {
+class ClientInput extends ResizableStage implements CSSStyleable {
 	
 	// root node
 	private VBox rootNode;
@@ -71,11 +71,14 @@ class ClientInput extends Stage implements CSSStyleable {
 	
 	// styling
 	private String cssPath;
+	
+	// estensibile
+	private MenuBar menuBar;
 
 	/* COSTRUTTORI */
 	
 	public ClientInput(String username, ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, UserDialog dialog, double width, double height) {
-		
+		super();
 		validate("username or databases list is null", username, databases, dialog);
 		if ( width < 0 || height < 0 )
 			throw new IllegalArgumentException("width < 0  || height < 0");
@@ -100,11 +103,13 @@ class ClientInput extends Stage implements CSSStyleable {
 		initQueryArea();
 		initErrorsTable();
 		initSendQuery();
+		initCloseButton();
 		
 		this.optionsList = optionsList;
 		this.formatsList = formatsList;
 		
-		rootNode.getChildren().addAll(setMainMenu(),HighToolbar, query, errorsTable, sendQuery);
+		menuBar = setMainMenu();
+		rootNode.getChildren().addAll(menuBar,HighToolbar, query, errorsTable, sendQuery);
 	}
 	
 	public ClientInput(ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList, UserDialog dialog, double width, double height) {
@@ -131,6 +136,7 @@ class ClientInput extends Stage implements CSSStyleable {
 	public void removeHistoryFileEventHandler(EventType<HistoryFileEvent> type , EventHandler<HistoryFileEvent> handler) { this.removeEventHandler(type, handler); }
 	public void removeSendQueryEventHandler(EventType<SendQueryEvent> type , EventHandler<SendQueryEvent> handler) { this.removeEventHandler(type, handler); }
 	
+	public void addSystemEventHandler(EventType<SystemEvent> type, EventHandler<SystemEvent> handler) { this.addEventHandler(type, handler); }
 	
 	// set mainMenu
 	
@@ -198,9 +204,7 @@ class ClientInput extends Stage implements CSSStyleable {
 				});
 			}
 			
-			Menu info = new Menu("Info");
-			
-			mainMenu.getMenus().addAll(databases, exporting, info);
+			mainMenu.getMenus().addAll(databases, exporting);
 		}
 		
 		return mainMenu;
@@ -274,6 +278,11 @@ class ClientInput extends Stage implements CSSStyleable {
 		return isConnected;
 	}
 	
+	// getMenuBar
+	public MenuBar getMenuBar() {
+		return this.menuBar;
+	}
+	
 	/* ALTRE COSE */
 	
 	// styling css
@@ -343,32 +352,6 @@ class ClientInput extends Stage implements CSSStyleable {
 		}
 		else
 			return databaseToAddOrDelete;
-	}
-	
-	/* METODI DELLE INTERFACCE */
-	
-	@Override
-	public void setCSSStyle(List<String> cssPath) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void addCSSStyle(String cssPath) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void resetCSSStyle() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void removeCSSStyle(String cssPath) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	/* METODI PRIVATI PER LEGGIBILITA' E UTILITA' */
@@ -442,12 +425,15 @@ class ClientInput extends Stage implements CSSStyleable {
 		HBox.setHgrow(this.password, Priority.ALWAYS);
 	}
 	
+	private void initCloseButton() {
+		super.close.setOnAction( ev -> this.fireEvent(new SystemEvent(SystemEvent.CLOSE)) );
+	}
+	
 	private void validate(String descError, Object...objects) {
 		
 		for ( Object ob : objects )
 			if ( ob == null )
-				throw new NullPointerException(descError);
-		
+				throw new NullPointerException(descError);	
 	}
 	
 }

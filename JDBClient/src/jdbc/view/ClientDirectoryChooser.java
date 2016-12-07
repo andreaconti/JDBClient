@@ -21,8 +21,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
+import jdbc.view.css.CSSStyleable;
 
-class ClientDirectoryChooser extends Dialog<Path> {
+class ClientDirectoryChooser implements CSSStyleable {
 	
 	protected TextField fileName;
 	protected TextField directoryChoosen;
@@ -35,6 +36,8 @@ class ClientDirectoryChooser extends Dialog<Path> {
 	protected Path result;
 	
 	protected VBox rootNode;
+	
+	private Dialog<Path> dialog;
 
 	public ClientDirectoryChooser(Path oldDirectory, List<ExportingOptions> exportingOptions, List<ExportingFormat> exportingFormats ) {
 		
@@ -43,6 +46,8 @@ class ClientDirectoryChooser extends Dialog<Path> {
 			throw new IllegalArgumentException();
 		
 		rootNode = new VBox(10);
+		
+		dialog = new Dialog<>();
 		
 		// imposto directoryChoosen
 		directoryChoosen = new TextField();
@@ -63,7 +68,7 @@ class ClientDirectoryChooser extends Dialog<Path> {
 		browse = new Button("Browse");
 		browse.setOnAction( ev -> {
 
-			UserDialog d = new UserDialog();
+			UserDialogImpl d = new UserDialogImpl();
 			Optional<File> result = d.chooseDirectory(oldDirectory != null ? oldDirectory.toFile() : Paths.get(System.getProperty("user.home")).toFile());
 			if ( result.isPresent()) {
 				this.result = result.get().toPath();
@@ -85,19 +90,19 @@ class ClientDirectoryChooser extends Dialog<Path> {
 		
 		close = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 		ok = new ButtonType("Done", ButtonData.OK_DONE);
-		this.getDialogPane().getButtonTypes().addAll(ok, close);
+		dialog.getDialogPane().getButtonTypes().addAll(ok, close);
 		rootNode.getChildren().addAll(browsingBar, fileName,  options, format);
 		
-		this.getDialogPane().setContent(rootNode);
+		dialog.getDialogPane().setContent(rootNode);
 		
-		this.setResultConverter( button -> {
+		dialog.setResultConverter( button -> {
 			if ( button == ok && result != null)
 				return result.resolve(fileName.getText());
 			else 
 				return null;
 		});
 		
-		Node enablerOk = this.getDialogPane().lookupButton(ok);
+		Node enablerOk = dialog.getDialogPane().lookupButton(ok);
 		enablerOk.setDisable(true);
 		
 		directoryChoosen.textProperty().addListener( (obs, oldV, newV) -> {
@@ -124,6 +129,34 @@ class ClientDirectoryChooser extends Dialog<Path> {
 	
 	public String getFileName() {
 		return this.fileName.getText();
+	}
+	
+	public void showAndWait() {
+		dialog.showAndWait();
+	}
+
+	@Override
+	public void setCSSStyle(List<String> cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void addCSSStyle(String cssPath) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void resetCSSStyle() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeCSSStyle(String cssPath) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

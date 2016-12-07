@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import jdbc.view.css.CSSStyleable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,12 +14,11 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 import jdbc.exporter.ExportingFormat;
 import jdbc.exporter.ExportingOptions;
 import jdbc.view.events.ExportQueryResultEvent;
 
-class ClientOutput extends Stage implements CSSStyleable {
+class ClientOutput extends ResizableStage {
 	
 	// core values
 	private List<QueryResultView> results;
@@ -75,30 +73,10 @@ class ClientOutput extends Stage implements CSSStyleable {
 		
 		rootNode.setBottom(tableChooser);
 		rootNode.setTop(initMainMenu());
-	}
-	
-
-	@Override
-	public void setCSSStyle(List<String> cssPath) {
-		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public void addCSSStyle(String cssPath) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void resetCSSStyle() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void removeCSSStyle(String cssPath) {
-		// TODO Auto-generated method stub
+		super.close.setOnAction( ev -> this.close() );
+		super.setAllScreenButtonVisible(false);
+		super.setMinimizeButtonVisible(false);
 		
 	}
 	

@@ -11,7 +11,7 @@ import jdbc.view.QueryResult;
 public class ExportQueryResultEvent extends ClientEvent {
 
 	private static final long serialVersionUID = 1L;
-	public static final EventType<? extends ClientEvent> ANY = new EventType<>(ClientEvent.ANY, "All ExportQueryResultEvents");
+	public static final EventType<ExportQueryResultEvent> ANY = new EventType<>("All ExportQueryResultEvents");
 	
 	private QueryResult queryResult;
 	private Path directoryPath;

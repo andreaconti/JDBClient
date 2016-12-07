@@ -23,6 +23,7 @@ public class starter extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		ClientUIController c = new ClientUIController(Arrays.asList(ExportingOptions.values()), Arrays.asList(ExportingFormat.values()));
 		c.show();
+		c.appendOperationsDescription("Proviamo un po...");
 
 		Tuple a1 = new Tuple("Andrea", "Conti", "3381382564");
 		Tuple a2 = new Tuple("dfhjdfkd", "Ciao", "44546464");

@@ -9,7 +9,7 @@ import jdbc.exporter.ExportingOptions;
 public class HistoryFileEvent extends ClientEvent {
 
 	private static final long serialVersionUID = 1L;
-	public static final EventType<? extends HistoryFileEvent> ANY = new EventType<>(ClientEvent.ANY, "Any HistoryFileEvent");
+	public static final EventType<HistoryFileEvent> ANY = new EventType<>("Any HistoryFileEvent");
 	
 	private ExportingOptions exportingOptions;
 	private ExportingFormat exportingFormats;

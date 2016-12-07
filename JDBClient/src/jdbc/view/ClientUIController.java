@@ -7,7 +7,8 @@ import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
-
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.stage.Screen;
 import javafx.util.Pair;
 import jdbc.exporter.ExportingFormat;
@@ -38,7 +39,7 @@ public class ClientUIController {
 	private List<ExportingFormat> exportingFormats;
 	
 	private StyleProducer styleProducer;
-	private UserDialog dialog;
+	private UserDialogImpl dialog;
 	
 	private List<Pair<EventHandler<? super SendQueryEvent>, EventType<? extends SendQueryEvent>>> eventHandlers = new ArrayList<>();
 	
@@ -52,12 +53,13 @@ public class ClientUIController {
 	 * @param formatsList formats file from witch the user can choose when he wants export or save a history of his queries
 	 */
 	public ClientUIController(String username, ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
-		dialog = new UserDialog();
+		dialog = new UserDialogImpl();
 		mainView = new ClientInput(username, databases, optionsList, formatsList, dialog, width, height);
 		mainView.setOptionsList(Arrays.asList(ExportingOptions.values()));
 		this.operationsView = new OperationsDescriptorView(height, width);
 		this.exportingFormats = formatsList;
 		this.exportingOptions = optionsList;
+		setMainMenuBar();
 	}
 	
 	/**
@@ -69,12 +71,13 @@ public class ClientUIController {
 	 * @param formatsList formats file from witch the user can choose when he wants export or save a history of his queries
 	 */
 	public ClientUIController(String username, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
-		dialog = new UserDialog();
+		dialog = new UserDialogImpl();
 		mainView = new ClientInput(username, optionsList, formatsList, dialog, width, height);
 		this.exportingFormats = formatsList;
 		this.exportingOptions = optionsList;
 		this.operationsView = new OperationsDescriptorView(height, width);
-		dialog = new UserDialog();
+		dialog = new UserDialogImpl();
+		setMainMenuBar();
 	}
 	
 	/**
@@ -86,12 +89,13 @@ public class ClientUIController {
 	 * @param formatsList formats file from witch the user can choose when he wants export or save a history of his queries
 	 */
 	public ClientUIController(ObservableList<String> databases, List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
-		dialog = new UserDialog();
+		dialog = new UserDialogImpl();
 		mainView = new ClientInput(databases, optionsList, formatsList, dialog, width, height);
 		this.exportingFormats = formatsList;
 		this.exportingOptions = optionsList;
 		this.operationsView = new OperationsDescriptorView(height, width);
-		dialog = new UserDialog();
+		dialog = new UserDialogImpl();
+		setMainMenuBar();
 	}
 	
 	/**
@@ -101,12 +105,13 @@ public class ClientUIController {
 	 * @param formatsList formats file from witch the user can choose when he wants export or save a history of his queries
 	 */
 	public ClientUIController(List<ExportingOptions> optionsList, List<ExportingFormat> formatsList) {
-		dialog = new UserDialog();
+		dialog = new UserDialogImpl();
 		mainView = new ClientInput(optionsList, formatsList, dialog, width, height);
 		this.operationsView = new OperationsDescriptorView(height, width);
 		this.exportingFormats = formatsList;
 		this.exportingOptions = optionsList;
-		dialog = new UserDialog();
+		dialog = new UserDialogImpl();
+		setMainMenuBar();
 	}
 	
 	/* TUTTI I GETTERS E SETTER */
@@ -349,7 +354,14 @@ public class ClientUIController {
 		this.eventHandlers.add(new Pair<>(handler, type));
 	}
 	
-	
+	/**
+	 * add an handler called when is fired an event about the application itself as a close request
+	 * @param type
+	 * @param handler
+	 */
+	public void addSystemEventHandler(EventType<SystemEvent> type, EventHandler<SystemEvent> handler) {
+		this.mainView.addSystemEventHandler(type, handler);
+	}
 	
 	/**
 	 * remove the EventHandler for the EventType specified
@@ -394,6 +406,30 @@ public class ClientUIController {
 	 */
 	public void removeExportQueryResultEventHandler(EventType<SendQueryEvent> type, EventHandler<SendQueryEvent> handler) {
 		this.eventHandlers.remove(new Pair<>(handler, type));
+	}
+	
+	/**
+	 * remove the EventHandler for the EventType specified
+	 * @param type the type of the Event
+	 * @param handler the EventHandler that is called
+	 */
+	public void removeSystemEventHandler(EventType<SystemEvent> type, EventHandler<SystemEvent> handler) {
+		this.mainView.removeEventHandler(type, handler);
+	}
+	
+	/* METODI PRIVATI */
+	
+	/*
+	 * adds menus to the menubar of the mainView
+	 */
+	private void setMainMenuBar() {
+		Menu info = new Menu("Info");
+		{
+			MenuItem operationsDescription = new MenuItem("Show Operations Description");
+			operationsDescription.setOnAction( ev -> this.operationsView.show());
+			info.getItems().add(operationsDescription);
+		}
+		this.mainView.getMenuBar().getMenus().add(info);	
 	}
 
 }

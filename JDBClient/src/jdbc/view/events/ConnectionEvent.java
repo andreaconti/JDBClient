@@ -7,9 +7,9 @@ public class ConnectionEvent extends ClientEvent {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final EventType<? extends ClientEvent> ANY_CONNECTION_REQUEST = new EventType<>(ClientEvent.ANY, "Any Connection Request");
-	public static final EventType<? extends ClientEvent> CONNECTION_REQUEST = new EventType<>(ConnectionEvent.ANY_CONNECTION_REQUEST, "Connection Request");
-	public static final EventType<? extends ClientEvent> DISCONNECTION_REQUEST = new EventType<>(ConnectionEvent.ANY_CONNECTION_REQUEST, "Disconnection Request");
+	public static final EventType<ConnectionEvent> ANY_CONNECTION_REQUEST = new EventType<>("Any Connection Request");
+	public static final EventType<ConnectionEvent> CONNECTION_REQUEST = new EventType<>(ConnectionEvent.ANY_CONNECTION_REQUEST, "Connection Request");
+	public static final EventType<ConnectionEvent> DISCONNECTION_REQUEST = new EventType<>(ConnectionEvent.ANY_CONNECTION_REQUEST, "Disconnection Request");
 	
 	private String username;
 	private String password;

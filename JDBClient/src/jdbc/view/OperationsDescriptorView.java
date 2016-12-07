@@ -10,10 +10,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
-import jdbc.view.css.CSSStyleable;
 
-class OperationsDescriptorView extends Stage implements CSSStyleable {
+class OperationsDescriptorView extends ResizableStage {
 	
 	private StringProperty text = new SimpleStringProperty();
 	private TextArea textArea;
@@ -28,10 +26,15 @@ class OperationsDescriptorView extends Stage implements CSSStyleable {
 		rootNode.setPadding(new Insets(10,10,10,10));
 		this.setScene(new Scene(rootNode, width, height));
 		rootNode.setCenter(textArea);
+		
+		text.set("");
+		
+		super.close.setOnAction( ev -> this.close() );
+		super.setAllScreenButtonVisible(false);
 	}
 	
 	public void appendText(List<String> strings) {
-		text.set(text.get() + "\n" + strings.stream().collect(Collectors.joining("\n")));
+		text.set(text.get() + (text.get().isEmpty() ? "" : "\n") + strings.stream().collect(Collectors.joining("\n")));
 	}
 	
 	public void appendText(String...strings) {
@@ -40,30 +43,6 @@ class OperationsDescriptorView extends Stage implements CSSStyleable {
 	
 	public void resetText() {
 		text.set("");
-	}
-
-	@Override
-	public void setCSSStyle(List<String> cssPath) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void addCSSStyle(String cssPath) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void resetCSSStyle() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void removeCSSStyle(String cssPath) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

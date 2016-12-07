@@ -10,9 +10,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
-class DatabasesListView extends Stage {
+class DatabasesListView extends ResizableStage {
 	
 	private Button delete;
 	private Button add;
@@ -38,6 +37,10 @@ class DatabasesListView extends Stage {
 		bar.getChildren().addAll(delete, add);
 		
 		rootNode.getChildren().addAll(dbView, bar);
+		
+		super.close.setOnAction( ev -> this.close() );
+		super.setAllScreenButtonVisible(false);
+		super.setMinimizeButtonVisible(false);
 		
 	}
 	
